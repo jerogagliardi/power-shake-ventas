@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Shake · Ventas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg:#080C12;--surface:#0F1520;--surface-2:#192030;--border:#1E2D42;
+    --accent:#00C9A7;--accent-glow:#00C9A720;--text:#E2EAF4;--text-2:#6B83A0;
+    --text-3:#3A4F66;--green:#2DD4A0;--purple:#7C6FF7;--amber:#F5A623;
+    --red:#F06070;--radius:10px;--radius-lg:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+  #setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+  .setup-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px 40px;width:100%;max-width:440px}
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+  .logo-icon{width:42px;height:42px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .logo-text{font-size:22px;font-weight:700;letter-spacing:-.5px}
+  .logo-text span{color:var(--accent)}
+  .setup-title{font-size:18px;font-weight:600;margin-bottom:6px}
+  .setup-sub{color:var(--text-2);font-size:14px;margin-bottom:28px;line-height:1.6}
+  .bookmarklet-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px}
+  .bookmarklet-box-title{font-size:13px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+  .bookmarklet-btn{display:inline-block;background:var(--accent);color:#000;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:var(--radius);text-decoration:none;cursor:grab;user-select:none;margin-bottom:10px}
+  .bookmarklet-hint{font-size:12px;color:var(--text-2)}
+  .steps{display:flex;flex-direction:column;gap:12px}
+  .step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-2)}
+  .step-n{flex-shrink:0;width:22px;height:22px;background:var(--surface);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);margin-top:1px}
+  #dashboard{display:none}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+  .topbar-logo{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}
+  .topbar-logo-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .topbar-logo span{color:var(--accent)}
+  .topbar-date{font-size:13px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .refresh-status{font-size:12px;color:var(--text-3)}
+  .btn-back{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-2);font-family:inherit;font-size:13px;padding:6px 14px;cursor:pointer;transition:.15s}
+  .btn-back:hover{border-color:var(--accent);color:var(--accent)}
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+  .tile{background:var(--surface);padding:18px 24px}
+  .tile-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
+  .tile-value{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-1px;line-height:1}
+  .tile-value.c-accent{color:var(--accent)}.tile-value.c-purple{color:var(--purple)}.tile-value.c-green{color:var(--green)}
+  .tile-sub{font-size:12px;color:var(--text-3);margin-top:3px}
+  .main{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:860px){.main{grid-template-columns:1fr}}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+  .panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .panel-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .panel-icon.teal{background:#00C9A720}.panel-icon.purple{background:#7C6FF720}
+  .panel-title{font-size:14px;font-weight:600}
+  .panel-count{margin-left:auto;font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:20px;padding:2px 10px}
+  .product-row{padding:12px 18px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+  .product-row:last-child{border-bottom:none}
+  .product-name{font-size:13px;font-weight:500;margin-bottom:4px}
+  .product-bar-track{height:3px;background:var(--border);border-radius:99px;margin-top:6px}
+  .product-bar-fill{height:100%;background:var(--accent);border-radius:99px}
+  .product-stats{text-align:right}
+  .product-amount{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
+  .product-units{font-size:12px;color:var(--text-2);margin-top:2px}
+  .sede-row{padding:12px 18px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:12px}
+  .sede-row:last-child{border-bottom:none}
+  .sede-dot{width:8px;height:8px;border-radius:50%;background:var(--purple)}
+  .sede-name{font-size:13px;font-weight:500}
+  .sede-right{text-align:right}
+  .sede-amount{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--purple)}
+  .sede-units{font-size:12px;color:var(--text-2);margin-top:2px}
+  .table-section{padding:0 24px 24px}
+  .table-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2);border-bottom:1px solid var(--border);white-space:nowrap}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--surface-2)}
+  td{padding:10px 14px;vertical-align:middle;white-space:nowrap}
+  td.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-2)}
+  td.amount{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+  .badge-ok{background:#2DD4A018;color:var(--green)}.badge-cancel{background:#F0607018;color:var(--red)}.badge-other{background:#F5A62318;color:var(--amber)}
+  .empty-state{padding:36px 20px;text-align:center;color:var(--text-2);font-size:14px}
+  .empty-icon{font-size:30px;margin-bottom:8px}
+  .no-data-notice{margin:24px;padding:18px 22px;background:#F5A62310;border:1px solid #F5A62340;border-radius:var(--radius-lg);color:var(--amber);display:none}
+  .no-data-notice strong{display:block;margin-bottom:6px}
+  .no-data-notice p{font-size:13px;color:var(--text-2)}
+</style>
+</head>
+<body>
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="logo"><div class="logo-icon">🥤</div><div class="logo-text">Power <span>Shake</span></div></div>
+    <div class="setup-title">Configuración inicial</div>
+    <div class="setup-sub">Para ver las ventas del día, arrastrá el botón verde a tu barra de favoritos. Luego usalo cada vez que quieras actualizar los datos.</div>
+    <div class="bookmarklet-box">
+      <div class="bookmarklet-box-title">Tu acceso rápido</div>
+      <a class="bookmarklet-btn" id="bookmarklet-link" href="#">🥤 Cargar ventas</a>
+      <div class="bookmarklet-hint">← Arrastrá este botón a tu barra de favoritos</div>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="step-n">1</span><span>Arrastrá el botón verde a la barra de favoritos de Chrome</span></div>
+      <div class="step"><span class="step-n">2</span><span>Abrí el <strong style="color:var(--text)">GS Smart System</strong> y logueate normalmente</span></div>
+      <div class="step"><span class="step-n">3</span><span>Con el GS System abierto, hacé clic en el favorito <strong style="color:var(--accent)">🥤 Cargar ventas</strong></span></div>
+      <div class="step"><span class="step-n">4</span><span>El dashboard se abre automáticamente con todas las ventas del día</span></div>
+    </div>
+  </div>
+</div>
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-logo"><div class="topbar-logo-icon">🥤</div>Power <span>Shake</span></div>
+    <div class="topbar-date" id="topbar-date"></div>
+    <div class="topbar-right">
+      <div class="refresh-status" id="refresh-status"></div>
+      <button class="btn-back" onclick="goSetup()">Actualizar datos</button>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="tile"><div class="tile-label">Ventas completadas</div><div class="tile-value c-accent" id="tile-count">—</div><div class="tile-sub" id="tile-sub">órdenes</div></div>
+    <div class="tile"><div class="tile-label">Ingresos del día</div><div class="tile-value c-purple" id="tile-revenue">—</div><div class="tile-sub">ARS</div></div>
+    <div class="tile"><div class="tile-label">Ticket promedio</div><div class="tile-value c-green" id="tile-avg">—</div><div class="tile-sub">por venta</div></div>
+    <div class="tile"><div class="tile-label">Máquinas activas</div><div class="tile-value" id="tile-machines">—</div><div class="tile-sub">con ventas hoy</div></div>
+  </div>
+  <div class="no-data-notice" id="no-data-notice"><strong>⚠ Solo hay órdenes canceladas hoy</strong><p>Se muestran igualmente abajo.</p></div>
+  <div class="main">
+    <div class="panel">
+      <div class="panel-header"><div class="panel-icon teal">📦</div><div class="panel-title">Por Producto</div><div class="panel-count" id="count-products">—</div></div>
+      <div id="products-body"><div class="empty-state"><div class="empty-icon">📦</div>Sin datos</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><div class="panel-icon purple">📍</div><div class="panel-title">Por Máquina</div><div class="panel-count" id="count-sedes">—</div></div>
+      <div id="sedes-body"><div class="empty-state"><div class="empty-icon">📍</div>Sin datos</div></div>
+    </div>
+  </div>
+  <div class="table-section">
+    <div class="table-panel">
+      <div class="panel-header"><div class="panel-icon teal">📋</div><div class="panel-title">Todas las órdenes de hoy</div><div class="panel-count" id="count-orders">—</div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Orden</th><th>Máquina</th><th>Producto</th><th>Monto</th><th>Pago</th><th>Hora</th><th>Estado</th></tr></thead>
+        <tbody id="orders-tbody"><tr><td colspan="7"><div class="empty-state">Sin datos</div></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+<script>
+const DASHBOARD_URL=location.href.split('#')[0];
+function buildBookmarklet(){
+  const url=DASHBOARD_URL;
+  const js=`javascript:(async function(){try{var today=new Date().toISOString().slice(0,10);var r=await window.axios.get('api/coffee/order/page',{params:{size:500,current:1,startDate:today,endDate:today}});var rows=r.data&&r.data.data&&r.data.data.records||[];var enc=btoa(unescape(encodeURIComponent(JSON.stringify(rows))));window.open('${url}#data='+enc,'_blank');}catch(e){alert('Error: '+e.message);}})();`;
+  document.getElementById('bookmarklet-link').href=js;
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  buildBookmarklet();updateDate();
+  const hash=location.hash;
+  if(hash.startsWith('#data=')){
+    try{
+      const json=decodeURIComponent(escape(atob(hash.slice(6))));
+      const orders=JSON.parse(json);
+      history.replaceState(null,'',location.pathname+location.search);
+      renderDashboard(orders);return;
+    }catch(e){console.error(e);}
+  }
+  showSetup();
+});
+function updateDate(){const now=new Date();document.getElementById('topbar-date').textContent=now.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function showSetup(){document.getElementById('setup-screen').style.display='flex';document.getElementById('dashboard').style.display='none';}
+function goSetup(){showSetup();}
+function renderDashboard(orders){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  updateDate();
+  orders.sort((a,b)=>new Date(a.createTime)-new Date(b.createTime));
+  const completed=orders.filter(o=>o.status!==7);
+  const allOrders=orders;
+  const useOrders=completed.length>0?completed:allOrders;
+  document.getElementById('no-data-notice').style.display=(completed.length===0&&allOrders.length>0)?'block':'none';
+  const total=useOrders.length;
+  const revenue=useOrders.reduce((s,o)=>s+Number(o.payAmt||0),0);
+  const avg=total?Math.round(revenue/total):0;
+  const byProduct={};
+  useOrders.forEach(o=>{const p=o.goodsName||'Producto desconocido';if(!byProduct[p])byProduct[p]={count:0,revenue:0};byProduct[p].count++;byProduct[p].revenue+=Number(o.payAmt||0);});
+  const bySede={};
+  useOrders.forEach(o=>{const s=o.deviceName||o.merchantName||'Desconocida';if(!bySede[s])bySede[s]={count:0,revenue:0};bySede[s].count++;bySede[s].revenue+=Number(o.payAmt||0);});
+  document.getElementById('tile-count').textContent=total;
+  document.getElementById('tile-sub').textContent=total===1?'orden':'órdenes';
+  document.getElementById('tile-revenue').textContent=fmt(revenue);
+  document.getElementById('tile-avg').textContent=total?'$'+fmt(avg):'—';
+  document.getElementById('tile-machines').textContent=Object.keys(bySede).length||'—';
+  document.getElementById('refresh-status').textContent=`Datos de hoy · ${new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+  const maxRev=Math.max(...Object.values(byProduct).map(v=>v.revenue),1);
+  const prodList=Object.entries(byProduct).sort((a,b)=>b[1].revenue-a[1].revenue);
+  document.getElementById('count-products').textContent=`${prodList.length} producto${prodList.length!==1?'s':''}`;
+  document.getElementById('products-body').innerHTML=prodList.length===0?'<div class="empty-state"><div class="empty-icon">📦</div>Sin ventas</div>':prodList.map(([name,d])=>`<div class="product-row"><div><div class="product-name">${esc(name)}</div><div class="product-bar-track"><div class="product-bar-fill" style="width:${Math.round(d.revenue/maxRev*100)}%"></div></div></div><div class="product-stats"><div class="product-amount">$${fmt(d.revenue)}</div><div class="product-units">${d.count} venta${d.count!==1?'s':''}</div></div></div>`).join('');
+  const sedeList=Object.entries(bySede).sort((a,b)=>b[1].revenue-a[1].revenue);
+  document.getElementById('count-sedes').textContent=`${sedeList.length} máquina${sedeList.length!==1?'s':''}`;
+  document.getElementById('sedes-body').innerHTML=sedeList.length===0?'<div class="empty-state"><div class="empty-icon">📍</div>Sin ventas</div>':sedeList.map(([sede,d])=>`<div class="sede-row"><div class="sede-dot"></div><div><div class="sede-name">${esc(sede)}</div></div><div class="sede-right"><div class="sede-amount">$${fmt(d.revenue)}</div><div class="sede-units">${d.count} venta${d.count!==1?'s':''}</div></div></div>`).join('');
+  document.getElementById('count-orders').textContent=`${allOrders.length} orden${allOrders.length!==1?'es':''}`;
+  document.getElementById('orders-tbody').innerHTML=allOrders.length===0?'<tr><td colspan="7"><div class="empty-state">Sin órdenes hoy</div></td></tr>':allOrders.map(o=>{const st=o.status;const cls=st===7?'badge-cancel':(st>=1&&st<=3?'badge-ok':'badge-other');return`<tr><td class="mono">${esc((o.orderNo||'').slice(-12))}</td><td>${esc(o.deviceName||o.merchantName||'—')}</td><td>${esc(o.goodsName||'—')}</td><td class="amount">$${fmt(Number(o.payAmt||0))}</td><td>${esc(o.payWayName||'—')}</td><td class="mono">${fmtTime(o.createTime)}</td><td><span class="badge ${cls}">${esc(o.statusName||String(st))}</span></td></tr>`;}).join('');
+}
+function fmt(n){return Number(n).toLocaleString('es-AR',{maximumFractionDigits:0});}
+function fmtTime(str){if(!str)return'—';const d=new Date(str.replace(' ','T')+(str.includes('T')?'':'-03:00'));return isNaN(d)?str:d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
