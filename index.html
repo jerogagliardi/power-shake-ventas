@@ -548,21 +548,23 @@ function renderAll() {
   const use = completed.length>0 ? completed : _filtered;
   document.getElementById('notice-cancel').style.display = (completed.length===0&&_filtered.length>0)?'block':'none';
 
-  const total = use.length;
-  const rev = use.reduce((s,o)=>s+Number(o.payAmt||0),0);
+  // Para ingresos: solo los que realmente pagaron (excluye free/exchange)
+  const paid = _filtered.filter(isPaid);
+  const total = use.filter(o=>o.status!==7).length;
+  const rev = paid.reduce((s,o)=>s+Number(o.payAmt||0),0);
   const avg = total?Math.round(rev/total):0;
 
   const byProd = {};
   use.forEach(o=>{
     const p=o.goodsName||'Desconocido';
     if(!byProd[p])byProd[p]={count:0,rev:0};
-    byProd[p].count++;byProd[p].rev+=Number(o.payAmt||0);
+    byProd[p].count++;if(isPaid(o))byProd[p].rev+=Number(o.payAmt||0);
   });
   const byMach = {};
   use.forEach(o=>{
     const m=o.deviceName||o.merchantName||'Desconocida';
     if(!byMach[m])byMach[m]={count:0,rev:0};
-    byMach[m].count++;byMach[m].rev+=Number(o.payAmt||0);
+    byMach[m].count++;if(isPaid(o))byMach[m].rev+=Number(o.payAmt||0);
   });
 
   document.getElementById('t-count').textContent=total;
@@ -761,7 +763,7 @@ function renderRent(){
   });
   const completed=_filtered.filter(o=>o.status!==7);
   const use=completed.length>0?completed:_filtered;
-  const ingresos=use.reduce((s,o)=>s+Number(o.payAmt||0),0);
+  const ingresos=_filtered.filter(isPaid).reduce((s,o)=>s+Number(o.payAmt||0),0);
 
   // Per-product cost table — grouped by category
   const byProd={};
@@ -838,7 +840,7 @@ function renderComp(byProd,byMach){
   _all.filter(o=>o.status!==7).forEach(o=>{
     const m=orderMonth(o); if(!m) return;
     if(!byMonth[m])byMonth[m]={rev:0,count:0};
-    byMonth[m].rev+=Number(o.payAmt||0);
+    if(isPaid(o))byMonth[m].rev+=Number(o.payAmt||0);
     byMonth[m].count++;
   });
   const months=Object.keys(byMonth).sort();
@@ -946,15 +948,16 @@ function svgBar(points){
 }
 
 // ── HELPERS ──
-// Convierte createTime (UTC del GS System) a fecha en hora argentina (UTC-3)
-function orderDate(o){
-  const str=o.createTime||'';if(!str)return'';
-  const d=new Date(str.replace(' ','T')+'Z');
-  const ar=new Date(d.getTime()-3*60*60*1000);
-  const pad=n=>String(n).padStart(2,'0');
-  return`${ar.getUTCFullYear()}-${pad(ar.getUTCMonth()+1)}-${pad(ar.getUTCDate())}`;
+// Órdenes que realmente generaron ingreso (excluye free, exchange, gratis, canje)
+function isPaid(o){
+  if(o.status===7)return false;
+  const pay=(o.payWayName||'').toLowerCase();
+  if(pay.includes('exchange')||pay.includes('free')||pay.includes('gratis')||pay.includes('canje'))return false;
+  return Number(o.payAmt||0)>0;
 }
-function orderMonth(o){return orderDate(o).slice(0,7);}
+// GS System guarda en hora local argentina — tomamos directo los primeros 10 chars
+function orderDate(o){return(o.createTime||'').slice(0,10);}
+function orderMonth(o){return(o.createTime||'').slice(0,7);}
 function fmt(n){return Number(n).toLocaleString('es-AR',{maximumFractionDigits:0});}
 function fmtTime(str){if(!str)return'—';const d=new Date(str.replace(' ','T')+(str.includes('T')?'':'-03:00'));return isNaN(d)?str:d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
 function fmtDateShort(s){if(!s||s.length<7)return s||'';const parts=s.split('-');return parts.length>=2?`${parts[2]||''}/${parts[1]||''}`:(s||'');}
