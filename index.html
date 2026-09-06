@@ -126,30 +126,29 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
 .no-chart{padding:40px 0;text-align:center;color:var(--t2);font-size:13px}
 
 /* ── STOCK ── */
-.stock-machine-sel{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
-.stock-machine-sel label{font-size:13px;font-weight:600;color:var(--t2)}
-.sel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:14px;padding:7px 12px;cursor:pointer;min-width:200px}
-.sel:focus{outline:none;border-color:var(--accent)}
-.stock-section-title{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px}
-.stock-grid{display:flex;flex-direction:column;gap:10px}
-.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;box-shadow:var(--sh)}
-.sc-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.sc-name{font-size:14px;font-weight:600;flex:1}
-.sc-chip{font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:2px 8px}
-.sc-bar-track{height:7px;background:var(--s2);border-radius:99px;overflow:hidden;margin-bottom:5px}
-.sc-bar-fill{height:100%;border-radius:99px;transition:width .4s}
-.sc-nums{display:flex;justify-content:space-between;margin-bottom:12px}
-.sc-avail{font-size:13px;font-weight:700}
-.sc-cap{font-size:12px;color:var(--t2)}
-.sc-fields{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px}
-@media(max-width:500px){.sc-fields{grid-template-columns:1fr 1fr;}.sc-fields .btn-reponer{grid-column:1/-1}}
-.sc-field label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:3px}
-.inp-field{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;padding:7px 10px;width:100%}
-.inp-field:focus{outline:none;border-color:var(--accent)}
-.inp-num{font-family:'JetBrains Mono',monospace;text-align:center}
-.btn-reponer{background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r);border:none;cursor:pointer;white-space:nowrap}
-.btn-reponer:hover{opacity:.9}
-.sc-footer{font-size:11px;color:var(--t3)}
+.stk-machine-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.stk-tab{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--t2);font-size:13px;font-weight:600;padding:7px 16px;cursor:pointer;transition:.15s}
+.stk-tab:hover{border-color:var(--accent);color:var(--accent)}
+.stk-tab.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent)}
+.stk-section-title{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 8px;padding:0 2px}
+.stk-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.stk-tbl thead th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2);border-bottom:2px solid var(--border);white-space:nowrap;background:var(--s2)}
+.stk-tbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.stk-tbl tbody tr:last-child{border-bottom:none}
+.stk-tbl tbody tr:hover{background:#F8F9FB}
+.stk-tbl td{padding:9px 12px;vertical-align:middle}
+.stk-prod-name{font-size:13px;font-weight:600;color:var(--text)}
+.stk-avail{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.stk-bar{width:60px;height:6px;background:var(--s2);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle}
+.stk-bar-fill{height:100%;border-radius:99px}
+.stk-pct{font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums}
+.stk-inp{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;width:80px;font-family:'JetBrains Mono',monospace;text-align:center}
+.stk-inp-date{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;width:130px}
+.stk-inp:focus,.stk-inp-date:focus{outline:none;border-color:var(--accent)}
+.btn-rep{background:var(--accent);color:#fff;font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;border:none;cursor:pointer;white-space:nowrap}
+.btn-rep:hover{opacity:.88}
+.stk-empty{padding:28px;text-align:center;color:var(--t2);font-size:13px}
+.avail-ok{color:var(--green)}.avail-warn{color:var(--amber)}.avail-low{color:var(--red)}
 
 /* ── RENTABILIDAD ── */
 .rent-inputs{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:16px;box-shadow:var(--sh)}
@@ -295,16 +294,40 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
   <!-- STOCK -->
   <div class="tab-panel" id="tp-stock">
     <div class="sec">
-      <div class="stock-machine-sel">
-        <label>Máquina:</label>
-        <select class="sel" id="stock-sel" onchange="renderStock()">
-          <option value="">— Seleccioná una máquina —</option>
-        </select>
+      <div class="stk-machine-tabs" id="stk-tabs"></div>
+      <div class="panel">
+        <div class="ph"><div class="ph-icon i-green">📦</div><div class="ph-title" id="stk-panel-title">Productos</div><div class="ph-badge" id="stk-badge">—</div></div>
+        <div class="tbl-wrap">
+          <table class="stk-tbl">
+            <thead><tr>
+              <th>Producto</th>
+              <th>Vendidos desde rep.</th>
+              <th>Disponibles</th>
+              <th style="width:90px">Capacidad</th>
+              <th>Estado</th>
+              <th>Últ. reposición</th>
+              <th style="width:90px">Qty repuesta</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="stk-body"><tr><td colspan="8" class="stk-empty">Seleccioná una máquina arriba.</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div class="stock-section-title">Productos vendidos</div>
-      <div class="stock-grid" id="stock-products"></div>
-      <div class="stock-section-title">Insumos generales</div>
-      <div class="stock-grid" id="stock-insumos"></div>
+      <div class="stk-section-title">Insumos generales</div>
+      <div class="panel">
+        <div class="tbl-wrap">
+          <table class="stk-tbl">
+            <thead><tr>
+              <th>Insumo</th>
+              <th colspan="2">Disponibles (ajuste manual)</th>
+              <th>Últ. reposición</th>
+              <th style="width:90px">Qty repuesta</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="stk-insumos"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -435,10 +458,10 @@ function initDashboard(orders) {
   _all = orders.sort((a,b)=>new Date(a.createTime)-new Date(b.createTime));
   _machines = [...new Set(_all.map(o=>o.deviceName||o.merchantName||'Desconocida'))].sort();
 
-  // Populate machine selectors
-  const sel = document.getElementById('stock-sel');
-  sel.innerHTML = '<option value="">— Seleccioná una máquina —</option>' +
-    _machines.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  // Build machine tabs for stock
+  _stkMachine = _machines[0] || '';
+  const tabs = document.getElementById('stk-tabs');
+  tabs.innerHTML = _machines.map((m,i)=>`<button class="stk-tab${i===0?' active':''}" onclick="stkSetMachine('${esc(m)}')" id="stktab_${i}">${esc(m)}</button>`).join('');
 
   document.getElementById('setup').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -569,68 +592,81 @@ function renderVentas(use, all, byProd, byMach) {
 }
 
 // ── STOCK ──
+let _stkMachine = '';
+
+function stkSetMachine(m) {
+  _stkMachine = m;
+  document.querySelectorAll('.stk-tab').forEach(b=>{
+    b.classList.toggle('active', b.textContent===m);
+  });
+  renderStock();
+}
+
 function renderStock() {
-  const machine = document.getElementById('stock-sel').value;
-  const pg = document.getElementById('stock-products');
-  const ig = document.getElementById('stock-insumos');
+  const machine = _stkMachine;
+  const body = document.getElementById('stk-body');
+  const ig = document.getElementById('stk-insumos');
 
   if (!machine) {
-    pg.innerHTML='<div class="empty"><div class="empty-icon">📦</div>Seleccioná una máquina.</div>';
+    body.innerHTML='<tr><td colspan="8" class="stk-empty">Seleccioná una máquina arriba.</td></tr>';
     ig.innerHTML='';
     return;
   }
 
   // Products from ALL orders for this machine
   const prodSet = new Set(_all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).map(o=>o.goodsName||'Desconocido'));
-
-  // Load stored products too
-  for (let i=0;i<localStorage.length;i++){
+  for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k&&k.startsWith('ps_sk__')){try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.machine===machine&&d.type==='product')prodSet.add(d.product);}catch(e){}}
   }
 
-  pg.innerHTML = [...prodSet].size===0
-    ? '<div class="empty"><div class="empty-icon">📦</div>No hay ventas de esta máquina.</div>'
-    : [...prodSet].sort().map(p=>renderStockCard(machine,p,'product')).join('');
+  const prods=[...prodSet].sort();
+  document.getElementById('stk-panel-title').textContent=machine;
+  document.getElementById('stk-badge').textContent=prods.length+' producto'+(prods.length!==1?'s':'');
 
-  ig.innerHTML = INSUMOS_BASE.map(ins=>renderStockCard(machine,ins,'insumo')).join('');
+  body.innerHTML = prods.length===0
+    ? '<tr><td colspan="8" class="stk-empty">No hay ventas de esta máquina todavía.</td></tr>'
+    : prods.map(p=>stkProductRow(machine,p)).join('');
+
+  ig.innerHTML = INSUMOS_BASE.map(ins=>stkInsumoRow(machine,ins)).join('');
 }
 
-function renderStockCard(machine, product, type) {
+function stkProductRow(machine, product) {
   const s = getStock(machine,product);
-  const cap = s?s.capacity:32;
-  const repDate = s?s.repDate:'';
-  const repQty = s?s.qty:cap;
+  const cap = s&&s.capacity?s.capacity:32;
+  const repDate = s?s.repDate||'':'';
+  const repQty = s&&s.qty?s.qty:cap;
+  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&(o.goodsName||'')===product&&o.status!==7&&(o.createTime||'').slice(0,10)>=repDate).length : '—';
+  const avail = repDate ? Math.max(0, repQty-(typeof sold==='number'?sold:0)) : '—';
+  const pct = (repDate && cap>0) ? Math.round((avail)/cap*100) : null;
+  const cls = pct===null?'':(pct>50?'avail-ok':pct>20?'avail-warn':'avail-low');
+  const barColor = pct===null?'var(--t3)':(pct>50?'var(--green)':pct>20?'var(--amber)':'var(--red)');
+  const rid = 'r'+Math.random().toString(36).slice(2,8);
+  return `<tr>
+    <td><div class="stk-prod-name">${esc(product)}</div></td>
+    <td style="font-variant-numeric:tabular-nums;font-weight:600;color:var(--t2)">${typeof sold==='number'?sold:'—'}</td>
+    <td><span class="stk-avail ${cls}">${avail!=='—'?avail+'':'—'}</span></td>
+    <td><input type="number" class="stk-inp" id="${rid}_cap" value="${cap}" min="1" max="999" title="Capacidad"></td>
+    <td>${pct!==null?`<span style="display:flex;align-items:center;gap:6px"><span class="stk-bar"><span class="stk-bar-fill" style="width:${pct}%;background:${barColor}"></span></span><span class="stk-pct">${pct}%</span></span>`:'<span class="stk-pct">sin fecha</span>'}</td>
+    <td><input type="date" class="stk-inp-date" id="${rid}_date" value="${repDate}"></td>
+    <td><input type="number" class="stk-inp" id="${rid}_qty" value="${repQty}" min="1" max="999"></td>
+    <td><button class="btn-rep" onclick="doReponer('${esc(machine)}','${esc(product)}','${rid}')">Reponer</button></td>
+  </tr>`;
+}
 
-  let sold = 0;
-  if (type==='product' && repDate) {
-    sold = _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&(o.goodsName||'')===product&&o.status!==7&&(o.createTime||'').slice(0,10)>=repDate).length;
-  }
-
-  const manualAvail = s&&s.manualAvail!==undefined ? s.manualAvail : null;
-  const avail = manualAvail!==null ? manualAvail : Math.max(0, repQty-sold);
-  const pct = cap>0?Math.round(avail/cap*100):0;
-  const color = pct>50?'var(--green)':pct>20?'var(--amber)':'var(--red)';
-  const id = 'sc_'+Math.random().toString(36).slice(2,9);
-  const id2 = 'sd_'+Math.random().toString(36).slice(2,9);
-  const id3 = 'sm_'+Math.random().toString(36).slice(2,9);
-  const chipTxt = type==='product'?`−${sold} desde rep.`:'insumo';
-
-  return `<div class="sc">
-    <div class="sc-top"><div class="sc-name">${esc(product)}</div><div class="sc-chip">${chipTxt}</div></div>
-    <div class="sc-bar-track"><div class="sc-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-    <div class="sc-nums"><span class="sc-avail" style="color:${color}">${avail} disponibles</span><span class="sc-cap">/ ${cap} capacidad</span></div>
-    <div class="sc-fields">
-      <div class="sc-field"><label>Últ. reposición</label><input type="date" class="inp-field" id="${id2}" value="${repDate}" placeholder="dd/mm/aaaa"></div>
-      <div class="sc-field"><label>Vasos repuestos</label><input type="number" class="inp-field inp-num" id="${id}" value="${repQty}" min="1" max="999"></div>
-      <button class="btn-reponer" onclick="doReponer('${esc(machine)}','${esc(product)}','${type}','${id}','${id2}','${id3}')">Reponer</button>
-    </div>
-    <div class="sc-fields" style="grid-template-columns:1fr auto;margin-top:4px">
-      <div class="sc-field"><label>Ajuste manual de disponibles</label><input type="number" class="inp-field inp-num" id="${id3}" value="${manualAvail!==null?manualAvail:''}" placeholder="Auto" min="0"></div>
-      <button class="btn-reponer" style="background:var(--s2);color:var(--accent);border:1px solid var(--accent);margin-top:18px" onclick="doManual('${esc(machine)}','${esc(product)}','${id3}')">Guardar</button>
-    </div>
-    ${s?`<div class="sc-footer">Última reposición: ${s.repDate||'—'} · ${s.qty} vasos</div>`:''}
-  </div>`;
+function stkInsumoRow(machine, ins) {
+  const s = getStock(machine,ins);
+  const avail = s&&s.manualAvail!==undefined?s.manualAvail:'';
+  const repDate = s?s.repDate||'':'';
+  const repQty = s&&s.qty?s.qty:'';
+  const rid = 'i'+Math.random().toString(36).slice(2,8);
+  return `<tr>
+    <td><div class="stk-prod-name">${esc(ins)}</div></td>
+    <td colspan="2"><input type="number" class="stk-inp" id="${rid}_avail" value="${avail}" placeholder="Disponibles" min="0" style="width:110px"></td>
+    <td><input type="date" class="stk-inp-date" id="${rid}_date" value="${repDate}"></td>
+    <td><input type="number" class="stk-inp" id="${rid}_qty" value="${repQty}" placeholder="Qty" min="0"></td>
+    <td><button class="btn-rep" onclick="doReponerInsumo('${esc(machine)}','${esc(ins)}','${rid}')">Guardar</button></td>
+  </tr>`;
 }
 
 function getStock(machine,product){
@@ -639,19 +675,19 @@ function getStock(machine,product){
 function setStock(machine,product,data){
   try{localStorage.setItem('ps_sk__'+btoa(encodeURIComponent(machine+'|'+product)),JSON.stringify(data));}catch(e){}
 }
-function doReponer(machine,product,type,idQty,idDate,idManual){
-  const qty=parseInt(document.getElementById(idQty).value,10);
-  const date=document.getElementById(idDate).value;
+function doReponer(machine,product,rid){
+  const qty=parseInt(document.getElementById(rid+'_qty').value,10);
+  const date=document.getElementById(rid+'_date').value;
+  const cap=parseInt(document.getElementById(rid+'_cap').value,10)||qty;
   if(!qty||qty<1){alert('Ingresá una cantidad válida');return;}
-  const existing=getStock(machine,product)||{};
-  setStock(machine,product,{...existing,machine,product,type,qty,capacity:qty,repDate:date,manualAvail:undefined});
+  setStock(machine,product,{machine,product,type:'product',qty,capacity:cap,repDate:date});
   renderStock();
 }
-function doManual(machine,product,idManual){
-  const val=document.getElementById(idManual).value;
-  const n=val===''?undefined:parseInt(val,10);
-  const existing=getStock(machine,product)||{machine,product,qty:32,capacity:32};
-  setStock(machine,product,{...existing,manualAvail:n});
+function doReponerInsumo(machine,ins,rid){
+  const avail=document.getElementById(rid+'_avail').value;
+  const date=document.getElementById(rid+'_date').value;
+  const qty=document.getElementById(rid+'_qty').value;
+  setStock(machine,ins,{machine,product:ins,type:'insumo',manualAvail:avail!==''?parseInt(avail,10):undefined,repDate:date,qty:qty!==''?parseInt(qty,10):undefined});
   renderStock();
 }
 
