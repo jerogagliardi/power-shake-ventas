@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -512,7 +511,7 @@ function applyFilter() {
   const todayStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 
   _filtered = _all.filter(o => {
-    const d = (o.createTime||'').slice(0,10);
+    const d = orderDate(o);
     if (_filterMode==='today') return d===todayStr;
     if (_filterMode==='week') {
       const w = new Date(now); w.setDate(w.getDate()-6);
@@ -589,7 +588,7 @@ function renderVentas(use, all, byProd, byMach) {
 
   // Line chart (sales per day)
   const byDay = {};
-  use.forEach(o=>{const d=(o.createTime||'').slice(0,10);if(d)byDay[d]=(byDay[d]||0)+1;});
+  use.forEach(o=>{const d=orderDate(o);if(d)byDay[d]=(byDay[d]||0)+1;});
   const days = Object.keys(byDay).sort();
   document.getElementById('chart-line').innerHTML = days.length<2
     ? `<div class="no-chart">${days.length===1?`<strong>${byDay[days[0]]}</strong> ventas el ${fmtDateShort(days[0])}`:'Sin datos para el gráfico'}</div>`
@@ -658,7 +657,7 @@ function stkProductRow(machine, product) {
   const cap = s&&s.capacity?s.capacity:32;
   const repDate = s?s.repDate||'':'';
   const repQty = s&&s.qty?s.qty:cap;
-  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&(o.goodsName||'')===product&&o.status!==7&&(o.createTime||'').slice(0,10)>=repDate).length : '—';
+  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&(o.goodsName||'')===product&&o.status!==7&&orderDate(o)>=repDate).length : '—';
   const avail = repDate ? Math.max(0, repQty-(typeof sold==='number'?sold:0)) : '—';
   const pct = (repDate && cap>0) ? Math.round((avail)/cap*100) : null;
   const cls = pct===null?'':(pct>50?'avail-ok':pct>20?'avail-warn':'avail-low');
@@ -682,7 +681,7 @@ function stkInsumoRow(machine, ins) {
   const repQty = s&&s.qty?s.qty:80;
   const cap = repQty;
   // Count ALL sales (every vaso/agua used = 1 venta) since repDate
-  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7&&(o.createTime||'').slice(0,10)>=repDate).length : null;
+  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7&&orderDate(o)>=repDate).length : null;
   const avail = sold!==null ? Math.max(0, repQty-sold) : null;
   const pct = (avail!==null&&cap>0) ? Math.round(avail/cap*100) : null;
   const cls = pct===null?'':(pct>50?'avail-ok':pct>20?'avail-warn':'avail-low');
@@ -728,9 +727,11 @@ function mapProductGroup(name) {
     return 'Pump V8';
   if (n.includes('electrolito'))
     return 'Electrolitos';
-  if ((n.includes('colage') || n.includes('collagen')) && (n.includes('verde') || n.includes('3 en 1') || n.includes('1 en 3') || (n.includes('protein') && n.includes('te'))))
+  // Proteína 3 en 1: solo si tiene "te verde", "3 en 1" o "1 en 3" explícitamente
+  if (n.includes('te verde') || n.includes('3 en 1') || n.includes('1 en 3'))
     return 'Proteína 3 en 1';
-  if ((n.includes('collagen') || n.includes('colage')) && (n.includes('chocolate') || n.includes('choco') || n.includes('vainilla') || n.includes('whey')))
+  // Collagen Whey (colágeno + proteína de chocolate o vainilla)
+  if (n.includes('collagen') || (n.includes('colag') && (n.includes('chocolate') || n.includes('choco') || n.includes('vainilla') || n.includes('whey'))))
     return 'Colágeno + Prote Choco/Vainilla';
   if ((n.includes('platinum') || n.includes('whey') || n.includes('vainilla') || n.includes('cookies')) && n.includes('creatina'))
     return 'Creatina + Proteína';
@@ -835,7 +836,7 @@ function renderComp(byProd,byMach){
   // Monthly charts — use ALL orders (ignores date filter, shows full history)
   const byMonth={};
   _all.filter(o=>o.status!==7).forEach(o=>{
-    const m=(o.createTime||'').slice(0,7); if(!m) return;
+    const m=orderMonth(o); if(!m) return;
     if(!byMonth[m])byMonth[m]={rev:0,count:0};
     byMonth[m].rev+=Number(o.payAmt||0);
     byMonth[m].count++;
@@ -945,6 +946,15 @@ function svgBar(points){
 }
 
 // ── HELPERS ──
+// Convierte createTime (UTC del GS System) a fecha en hora argentina (UTC-3)
+function orderDate(o){
+  const str=o.createTime||'';if(!str)return'';
+  const d=new Date(str.replace(' ','T')+'Z');
+  const ar=new Date(d.getTime()-3*60*60*1000);
+  const pad=n=>String(n).padStart(2,'0');
+  return`${ar.getUTCFullYear()}-${pad(ar.getUTCMonth()+1)}-${pad(ar.getUTCDate())}`;
+}
+function orderMonth(o){return orderDate(o).slice(0,7);}
 function fmt(n){return Number(n).toLocaleString('es-AR',{maximumFractionDigits:0});}
 function fmtTime(str){if(!str)return'—';const d=new Date(str.replace(' ','T')+(str.includes('T')?'':'-03:00'));return isNaN(d)?str:d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
 function fmtDateShort(s){if(!s||s.length<7)return s||'';const parts=s.split('-');return parts.length>=2?`${parts[2]||''}/${parts[1]||''}`:(s||'');}
