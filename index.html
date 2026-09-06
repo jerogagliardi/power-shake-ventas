@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -627,6 +626,19 @@ function stkSetMachine(m) {
   renderStock();
 }
 
+// Productos físicos fijos por máquina (keyword matching)
+const MACHINE_PHYSICAL_PRODUCTS = {
+  'Sport club Cuyo': [
+    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
+    { label: 'Proteína Cookies',           match: n => n.includes('cookies')&&!n.includes('cream') },
+    { label: 'Proteína Vainilla',          match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag') },
+    { label: 'Creatina',                   match: n => n.includes('creatina') },
+    { label: 'Pump V8',                    match: n => n.includes('pump')||n.includes('v8') },
+    { label: 'Electrolitos',              match: n => n.includes('electrolito') },
+    { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
+  ]
+};
+
 function renderStock() {
   const machine = _stkMachine;
   const body = document.getElementById('stk-body');
@@ -638,21 +650,58 @@ function renderStock() {
     return;
   }
 
-  // Top 8 active products for this machine (by total sales count)
-  const prodCount={};
-  _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).forEach(o=>{
-    const p=o.goodsName||'Desconocido';
-    prodCount[p]=(prodCount[p]||0)+1;
-  });
-  const prods=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([p])=>p).sort();
   document.getElementById('stk-panel-title').textContent=machine;
-  document.getElementById('stk-badge').textContent=prods.length+' producto'+(prods.length!==1?'s':'');
+  const physProds = MACHINE_PHYSICAL_PRODUCTS[machine];
 
-  body.innerHTML = prods.length===0
-    ? '<tr><td colspan="8" class="stk-empty">No hay ventas de esta máquina todavía.</td></tr>'
-    : prods.map(p=>stkProductRow(machine,p)).join('');
+  if (physProds) {
+    // Máquina con productos físicos definidos — matching por palabras clave
+    document.getElementById('stk-badge').textContent=physProds.length+' producto'+(physProds.length!==1?'s':'');
+    body.innerHTML = physProds.map(p=>stkPhysicalRow(machine,p)).join('');
+  } else {
+    // Máquinas auto: top 8 por nombre exacto
+    const prodCount={};
+    _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).forEach(o=>{
+      const p=o.goodsName||'Desconocido';
+      prodCount[p]=(prodCount[p]||0)+1;
+    });
+    const prods=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([p])=>p).sort();
+    document.getElementById('stk-badge').textContent=prods.length+' producto'+(prods.length!==1?'s':'');
+    body.innerHTML = prods.length===0
+      ? '<tr><td colspan="8" class="stk-empty">No hay ventas de esta máquina todavía.</td></tr>'
+      : prods.map(p=>stkProductRow(machine,p)).join('');
+  }
 
   ig.innerHTML = INSUMOS_BASE.map(ins=>stkInsumoRow(machine,ins)).join('');
+}
+
+function stkPhysicalRow(machine, physProd) {
+  const product = physProd.label;
+  const s = getStock(machine, product);
+  const cap = s&&s.capacity?s.capacity:32;
+  const repDate = s?s.repDate||'':'';
+  const repQty = s&&s.qty?s.qty:cap;
+  // Contar ventas por keyword matching (un combo puede contar para múltiples físicos)
+  const sold = repDate ? _all.filter(o=>{
+    if((o.deviceName||o.merchantName||'Desconocida')!==machine) return false;
+    if(o.status===7) return false;
+    if(orderDate(o)<repDate) return false;
+    return physProd.match((o.goodsName||'').toLowerCase());
+  }).length : '—';
+  const avail = repDate ? Math.max(0, repQty-(typeof sold==='number'?sold:0)) : '—';
+  const pct = (repDate && cap>0) ? Math.round((avail)/cap*100) : null;
+  const cls = pct===null?'':(pct>50?'avail-ok':pct>20?'avail-warn':'avail-low');
+  const barColor = pct===null?'var(--t3)':(pct>50?'var(--green)':pct>20?'var(--amber)':'var(--red)');
+  const rid = 'r'+Math.random().toString(36).slice(2,8);
+  return `<tr>
+    <td><div class="stk-prod-name">${esc(product)}</div></td>
+    <td style="font-variant-numeric:tabular-nums;font-weight:600;color:var(--t2)">${typeof sold==='number'?sold:'—'}</td>
+    <td><span class="stk-avail ${cls}">${avail!=='—'?avail:'—'}</span></td>
+    <td><input type="number" class="stk-inp" id="${rid}_cap" value="${cap}" min="1" max="999" title="Capacidad"></td>
+    <td>${pct!==null?`<span style="display:flex;align-items:center;gap:6px"><span class="stk-bar"><span class="stk-bar-fill" style="width:${pct}%;background:${barColor}"></span></span><span class="stk-pct">${pct}%</span></span>`:'<span class="stk-pct">sin fecha</span>'}</td>
+    <td><input type="date" class="stk-inp-date" id="${rid}_date" value="${repDate}"></td>
+    <td><input type="number" class="stk-inp" id="${rid}_qty" value="${repQty}" min="1" max="999"></td>
+    <td><button class="btn-rep" onclick="doReponer('${esc(machine)}','${esc(product)}','${rid}')">Reponer</button></td>
+  </tr>`;
 }
 
 function stkProductRow(machine, product) {
