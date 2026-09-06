@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -719,6 +718,28 @@ function doReponerInsumo(machine,ins,rid){
   renderStock();
 }
 
+// ── PRODUCT GROUP MAPPING (solo para Rentabilidad) ──
+function mapProductGroup(name) {
+  const n = (name||'').toLowerCase();
+  if (n.includes('frutos rojos') || (n.includes('vital') && n.includes('colag')))
+    return 'Colágeno Frutos Rojos';
+  if (n.includes('pump') || n.includes('v8'))
+    return 'Pump V8';
+  if (n.includes('electrolito'))
+    return 'Electrolitos';
+  if ((n.includes('colage') || n.includes('collagen')) && (n.includes('verde') || n.includes('3 en 1') || n.includes('1 en 3') || (n.includes('protein') && n.includes('te'))))
+    return 'Proteína 3 en 1';
+  if ((n.includes('collagen') || n.includes('colage')) && (n.includes('chocolate') || n.includes('choco') || n.includes('vainilla') || n.includes('whey')))
+    return 'Colágeno + Prote Choco/Vainilla';
+  if ((n.includes('platinum') || n.includes('whey') || n.includes('vainilla') || n.includes('cookies')) && n.includes('creatina'))
+    return 'Creatina + Proteína';
+  if (n.includes('creatina'))
+    return 'Creatina';
+  if (n.includes('platinum') || n.includes('cookies') || n.includes('vainilla') || n.includes('whey'))
+    return 'Prote Cookies y Vainilla';
+  return name;
+}
+
 // ── RENTABILIDAD ──
 function restoreRentInputs(){
   ['r-admin','r-logistica','r-honorarios'].forEach(id=>{
@@ -740,10 +761,10 @@ function renderRent(){
   const use=completed.length>0?completed:_filtered;
   const ingresos=use.reduce((s,o)=>s+Number(o.payAmt||0),0);
 
-  // Per-product cost table
+  // Per-product cost table — grouped by category
   const byProd={};
   use.forEach(o=>{
-    const p=o.goodsName||'Desconocido';
+    const p=mapProductGroup(o.goodsName||'Desconocido');
     if(!byProd[p])byProd[p]=0;
     byProd[p]++;
   });
