@@ -194,10 +194,12 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
 .empty{padding:32px 20px;text-align:center;color:var(--t2);font-size:13px}
 .empty-icon{font-size:26px;margin-bottom:6px}
 .notice{padding:12px 16px;background:#A0622A12;border:1px solid #A0622A30;border-radius:var(--r);color:var(--amber);font-size:13px;margin-bottom:14px;display:none}
+#chart-tooltip{position:fixed;background:var(--text);color:#fff;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;pointer-events:none;display:none;z-index:9999;white-space:nowrap;}
 </style>
 </head>
 <body>
 
+<div id="chart-tooltip"></div>
 <!-- ══ SETUP ══ -->
 <div id="setup">
 <div class="setup-card">
@@ -306,7 +308,7 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
               <th style="width:90px">Capacidad</th>
               <th>Estado</th>
               <th>Últ. reposición</th>
-              <th style="width:90px">Qty repuesta</th>
+              <th style="width:100px">Cant. repuesta</th>
               <th></th>
             </tr></thead>
             <tbody id="stk-body"><tr><td colspan="8" class="stk-empty">Seleccioná una máquina arriba.</td></tr></tbody>
@@ -319,9 +321,10 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
           <table class="stk-tbl">
             <thead><tr>
               <th>Insumo</th>
-              <th colspan="2">Disponibles (ajuste manual)</th>
+              <th>Disponibles</th>
+              <th>Estado</th>
               <th>Últ. reposición</th>
-              <th style="width:90px">Qty repuesta</th>
+              <th style="width:100px">Cant. repuesta</th>
               <th></th>
             </tr></thead>
             <tbody id="stk-insumos"></tbody>
@@ -334,18 +337,27 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
   <!-- RENTABILIDAD -->
   <div class="tab-panel" id="tp-rent">
     <div class="sec">
+      <!-- Costo por producto -->
+      <div class="panel" style="margin-bottom:14px">
+        <div class="ph"><div class="ph-icon i-amber">💰</div><div class="ph-title">Costo por producto</div><div class="ph-badge" id="r-pond-badge">Costo prom. pond.: —</div></div>
+        <div class="tbl-wrap">
+          <table class="stk-tbl">
+            <thead><tr><th>Producto</th><th>Vendidos</th><th style="width:160px">Costo por vaso (ARS)</th><th>Subtotal</th></tr></thead>
+            <tbody id="r-prod-body"><tr><td colspan="4" class="stk-empty">Cargá datos para ver los productos.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Otros costos -->
       <div class="rent-inputs">
-        <div class="rent-inputs-title">Costos del período</div>
+        <div class="rent-inputs-title">Otros costos del período</div>
         <div class="rent-fields">
           <div class="rent-field">
-            <label>Costo por vaso</label>
-            <input type="number" class="inp-money" id="r-costo-vaso" placeholder="0" min="0" oninput="renderRent()">
-            <div class="hint">ARS · precio de costo de cada vaso vendido</div>
-          </div>
-          <div class="rent-field">
             <label>Costos admin</label>
-            <input type="number" class="inp-money" id="r-admin" placeholder="0" min="0" oninput="renderRent()">
-            <div class="hint">ARS · gastos administrativos del período</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" class="inp-money" id="r-admin" placeholder="0" min="0" max="100" step="0.1" oninput="renderRent()" style="flex:1">
+              <span style="font-size:13px;color:var(--t2);font-weight:600">%</span>
+            </div>
+            <div class="hint">% sobre los ingresos totales</div>
           </div>
           <div class="rent-field">
             <label>Costos logística</label>
@@ -366,7 +378,7 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
       </div>
       <div class="rent-tiles" id="rent-tiles">
         <div class="rt"><div class="rt-label">Ingresos</div><div class="rt-value c-purple" id="r-ingreso">—</div><div class="rt-sub">ARS</div></div>
-        <div class="rt"><div class="rt-label">Costo vasos</div><div class="rt-value" id="r-cv" style="color:var(--amber)">—</div><div class="rt-sub">ARS</div></div>
+        <div class="rt"><div class="rt-label">Costo vasos</div><div class="rt-value" id="r-cv" style="color:var(--amber)">—</div><div class="rt-sub">ARS · suma de todos los productos</div></div>
         <div class="rt"><div class="rt-label">% Gimnasios</div><div class="rt-value" id="r-gym" style="color:var(--amber)">—</div><div class="rt-sub">15% de ingresos</div></div>
         <div class="rt"><div class="rt-label">Total costos</div><div class="rt-value" id="r-total-cost" style="color:var(--red)">—</div><div class="rt-sub">ARS</div></div>
         <div class="rt"><div class="rt-label">Ganancia neta</div><div class="rt-value c-green" id="r-ganancia">—</div><div class="rt-sub">ARS</div></div>
@@ -385,6 +397,16 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
       <div class="stars-row">
         <div class="star-card"><span class="star-icon">🏆</span><div><div class="star-label">Producto estrella</div><div class="star-name" id="star-prod">—</div><div class="star-stat" id="star-prod-stat"></div></div></div>
         <div class="star-card"><span class="star-icon">📍</span><div><div class="star-label">Máquina estrella</div><div class="star-name" id="star-mach">—</div><div class="star-stat" id="star-mach-stat"></div></div></div>
+      </div>
+      <div class="chart-row" style="margin-bottom:14px">
+        <div class="panel">
+          <div class="ph"><div class="ph-icon i-purple">📈</div><div class="ph-title">Ingresos por mes</div><div class="ph-badge" id="comp-rev-total">—</div></div>
+          <div class="chart-inner" id="comp-line"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="ph-icon i-green">📊</div><div class="ph-title">Ventas por mes</div><div class="ph-badge" id="comp-vol-total">—</div></div>
+          <div class="chart-inner" id="comp-bar"></div>
+        </div>
       </div>
       <div class="g2">
         <div class="panel">
@@ -613,14 +635,13 @@ function renderStock() {
     return;
   }
 
-  // Products from ALL orders for this machine
-  const prodSet = new Set(_all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).map(o=>o.goodsName||'Desconocido'));
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(k&&k.startsWith('ps_sk__')){try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.machine===machine&&d.type==='product')prodSet.add(d.product);}catch(e){}}
-  }
-
-  const prods=[...prodSet].sort();
+  // Top 8 active products for this machine (by total sales count)
+  const prodCount={};
+  _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).forEach(o=>{
+    const p=o.goodsName||'Desconocido';
+    prodCount[p]=(prodCount[p]||0)+1;
+  });
+  const prods=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([p])=>p).sort();
   document.getElementById('stk-panel-title').textContent=machine;
   document.getElementById('stk-badge').textContent=prods.length+' producto'+(prods.length!==1?'s':'');
 
@@ -656,16 +677,23 @@ function stkProductRow(machine, product) {
 
 function stkInsumoRow(machine, ins) {
   const s = getStock(machine,ins);
-  const avail = s&&s.manualAvail!==undefined?s.manualAvail:'';
   const repDate = s?s.repDate||'':'';
-  const repQty = s&&s.qty?s.qty:'';
+  const repQty = s&&s.qty?s.qty:80;
+  const cap = repQty;
+  // Count ALL sales (every vaso/agua used = 1 venta) since repDate
+  const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7&&(o.createTime||'').slice(0,10)>=repDate).length : null;
+  const avail = sold!==null ? Math.max(0, repQty-sold) : null;
+  const pct = (avail!==null&&cap>0) ? Math.round(avail/cap*100) : null;
+  const cls = pct===null?'':(pct>50?'avail-ok':pct>20?'avail-warn':'avail-low');
+  const barColor = pct===null?'var(--t3)':(pct>50?'var(--green)':pct>20?'var(--amber)':'var(--red)');
   const rid = 'i'+Math.random().toString(36).slice(2,8);
   return `<tr>
     <td><div class="stk-prod-name">${esc(ins)}</div></td>
-    <td colspan="2"><input type="number" class="stk-inp" id="${rid}_avail" value="${avail}" placeholder="Disponibles" min="0" style="width:110px"></td>
+    <td><span class="stk-avail ${cls}">${avail!==null?avail:'—'}</span></td>
+    <td>${pct!==null?`<span style="display:flex;align-items:center;gap:6px"><span class="stk-bar"><span class="stk-bar-fill" style="width:${pct}%;background:${barColor}"></span></span><span class="stk-pct">${pct}%</span></span>`:'<span class="stk-pct">sin fecha</span>'}</td>
     <td><input type="date" class="stk-inp-date" id="${rid}_date" value="${repDate}"></td>
-    <td><input type="number" class="stk-inp" id="${rid}_qty" value="${repQty}" placeholder="Qty" min="0"></td>
-    <td><button class="btn-rep" onclick="doReponerInsumo('${esc(machine)}','${esc(ins)}','${rid}')">Guardar</button></td>
+    <td><input type="number" class="stk-inp" id="${rid}_qty" value="${repQty}" placeholder="80" min="1" title="Vasos disponibles al reponer"></td>
+    <td><button class="btn-rep" onclick="doReponerInsumo('${esc(machine)}','${esc(ins)}','${rid}')">Reponer</button></td>
   </tr>`;
 }
 
@@ -684,49 +712,84 @@ function doReponer(machine,product,rid){
   renderStock();
 }
 function doReponerInsumo(machine,ins,rid){
-  const avail=document.getElementById(rid+'_avail').value;
   const date=document.getElementById(rid+'_date').value;
-  const qty=document.getElementById(rid+'_qty').value;
-  setStock(machine,ins,{machine,product:ins,type:'insumo',manualAvail:avail!==''?parseInt(avail,10):undefined,repDate:date,qty:qty!==''?parseInt(qty,10):undefined});
+  const qty=parseInt(document.getElementById(rid+'_qty').value,10)||80;
+  setStock(machine,ins,{machine,product:ins,type:'insumo',repDate:date,qty});
   renderStock();
 }
 
 // ── RENTABILIDAD ──
 function restoreRentInputs(){
-  ['r-costo-vaso','r-admin','r-logistica','r-honorarios'].forEach(id=>{
+  ['r-admin','r-logistica','r-honorarios'].forEach(id=>{
     const v=localStorage.getItem('ps_'+id);
     if(v) document.getElementById(id).value=v;
   });
 }
+function getRentCosto(prod){
+  try{return Number(localStorage.getItem('ps_costo__'+btoa(encodeURIComponent(prod)))||0);}catch(e){return 0;}
+}
+function setRentCosto(prod,val){
+  try{localStorage.setItem('ps_costo__'+btoa(encodeURIComponent(prod)),val);}catch(e){}
+}
 function renderRent(){
-  ['r-costo-vaso','r-admin','r-logistica','r-honorarios'].forEach(id=>{
+  ['r-admin','r-logistica','r-honorarios'].forEach(id=>{
     localStorage.setItem('ps_'+id, document.getElementById(id).value||'');
   });
   const completed=_filtered.filter(o=>o.status!==7);
   const use=completed.length>0?completed:_filtered;
   const ingresos=use.reduce((s,o)=>s+Number(o.payAmt||0),0);
-  const vasos=use.length;
-  const cv=Number(document.getElementById('r-costo-vaso').value)||0;
-  const admin=Number(document.getElementById('r-admin').value)||0;
+
+  // Per-product cost table
+  const byProd={};
+  use.forEach(o=>{
+    const p=o.goodsName||'Desconocido';
+    if(!byProd[p])byProd[p]=0;
+    byProd[p]++;
+  });
+  const prodArr=Object.entries(byProd).sort((a,b)=>b[1]-a[1]);
+
+  let costoVasos=0;
+  let totalVasos=0;
+  const prodRows=prodArr.map(([prod,count])=>{
+    const costo=getRentCosto(prod);
+    const sub=costo*count;
+    costoVasos+=sub;
+    totalVasos+=count;
+    const rid='rp_'+Math.random().toString(36).slice(2,8);
+    return`<tr>
+      <td style="font-size:13px;font-weight:500">${esc(prod)}</td>
+      <td style="font-variant-numeric:tabular-nums;font-weight:600;color:var(--t2)">${count}</td>
+      <td><input type="number" class="stk-inp" id="${rid}" value="${costo||''}" placeholder="0" min="0" style="width:120px" onchange="setRentCosto('${esc(prod)}',this.value);renderRent()"></td>
+      <td style="font-variant-numeric:tabular-nums;font-weight:700;color:var(--amber)">$${fmt(sub)}</td>
+    </tr>`;
+  }).join('');
+
+  const promPond = totalVasos>0 ? Math.round(costoVasos/totalVasos) : 0;
+  document.getElementById('r-prod-body').innerHTML = prodArr.length===0
+    ? '<tr><td colspan="4" class="stk-empty">Sin ventas en el período.</td></tr>'
+    : prodRows + `<tr style="border-top:2px solid var(--border);font-weight:700"><td colspan="2" style="color:var(--t2);font-size:12px">TOTAL · Prom. ponderado: $${fmt(promPond)}/vaso</td><td></td><td style="color:var(--amber);font-size:15px">$${fmt(costoVasos)}</td></tr>`;
+  document.getElementById('r-pond-badge').textContent='Prom. pond.: $'+fmt(promPond)+'/vaso';
+
+  const adminPct=Number(document.getElementById('r-admin').value)||0;
+  const admin=Math.round(ingresos*adminPct/100);
   const logistica=Number(document.getElementById('r-logistica').value)||0;
   const honorarios=Number(document.getElementById('r-honorarios').value)||0;
   const gym=Math.round(ingresos*0.15);
-  const costoVasos=vasos*cv;
   const totalCostos=costoVasos+admin+logistica+honorarios+gym;
   const ganancia=ingresos-totalCostos;
   const margen=ingresos>0?Math.round(ganancia/ingresos*100):0;
 
   document.getElementById('r-ingreso').textContent='$'+fmt(ingresos);
-  document.getElementById('r-cv').textContent=cv>0?'$'+fmt(costoVasos):'—';
+  document.getElementById('r-cv').textContent='$'+fmt(costoVasos);
   document.getElementById('r-gym').textContent='$'+fmt(gym);
   document.getElementById('r-total-cost').textContent='$'+fmt(totalCostos);
   document.getElementById('r-ganancia').textContent='$'+fmt(ganancia);
   document.getElementById('r-margen').textContent=margen+'%';
 
   const items=[
-    {name:'Costo vasos ('+vasos+' u.)',val:costoVasos,color:'var(--amber)'},
+    {name:'Costo vasos ('+totalVasos+' u.)',val:costoVasos,color:'var(--amber)'},
     {name:'% Gimnasios (15%)',val:gym,color:'var(--amber)'},
-    {name:'Costos admin',val:admin,color:'var(--amber)'},
+    {name:`Costos admin (${adminPct}%)`,val:admin,color:'var(--amber)'},
     {name:'Costos logística',val:logistica,color:'var(--amber)'},
     {name:'Honorarios',val:honorarios,color:'var(--amber)'},
     {name:'Ganancia neta',val:Math.max(0,ganancia),color:'var(--green)',bold:true},
@@ -745,6 +808,28 @@ function renderComp(byProd,byMach){
   const topM=Object.entries(byMach).sort((a,b)=>b[1].rev-a[1].rev)[0];
   if(topP){document.getElementById('star-prod').textContent=shortName(topP[0]);document.getElementById('star-prod-stat').textContent='$'+fmt(topP[1].rev)+' · '+topP[1].count+' ventas';}
   if(topM){document.getElementById('star-mach').textContent=topM[0];document.getElementById('star-mach-stat').textContent='$'+fmt(topM[1].rev)+' · '+topM[1].count+' ventas';}
+
+  // Monthly charts — use ALL orders (ignores date filter, shows full history)
+  const byMonth={};
+  _all.filter(o=>o.status!==7).forEach(o=>{
+    const m=(o.createTime||'').slice(0,7); if(!m) return;
+    if(!byMonth[m])byMonth[m]={rev:0,count:0};
+    byMonth[m].rev+=Number(o.payAmt||0);
+    byMonth[m].count++;
+  });
+  const months=Object.keys(byMonth).sort();
+  const totalRevAll=months.reduce((s,m)=>s+byMonth[m].rev,0);
+  const totalVolAll=months.reduce((s,m)=>s+byMonth[m].count,0);
+  document.getElementById('comp-rev-total').textContent='$'+fmt(totalRevAll)+' total';
+  document.getElementById('comp-vol-total').textContent=totalVolAll+' ventas total';
+
+  if(months.length>=2){
+    document.getElementById('comp-line').innerHTML=svgLine(months.map(m=>({x:m.slice(0,7),y:byMonth[m].rev})));
+    document.getElementById('comp-bar').innerHTML=svgBar(months.map(m=>({x:m.slice(0,7),y:byMonth[m].count})));
+  } else {
+    document.getElementById('comp-line').innerHTML='<div class="no-chart">Sin suficientes datos para el gráfico mensual.</div>';
+    document.getElementById('comp-bar').innerHTML='<div class="no-chart">Sin suficientes datos.</div>';
+  }
 
   const machArr=Object.entries(byMach).sort((a,b)=>b[1].rev-a[1].rev);
   const totalR=machArr.reduce((s,[,d])=>s+d.rev,0);
@@ -797,6 +882,7 @@ function svgLine(points){
   const linePts=points.map((p,i)=>`${xs(i)},${ys(p.y)}`).join(' ');
   const areaPts=`${xs(0)},${ys(0)} ${linePts} ${xs(points.length-1)},${ys(0)}`;
 
+  const dots=points.map((p,i)=>`<circle cx="${xs(i)}" cy="${ys(p.y)}" r="5" fill="var(--accent)" opacity="0" style="cursor:pointer" onmouseenter="showTip(event,'${p.x}: ${p.y} ventas')" onmouseleave="hideTip()"/><circle cx="${xs(i)}" cy="${ys(p.y)}" r="3" fill="var(--accent)" style="pointer-events:none"/>`).join('');
   return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
     <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
     <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+iH}" stroke="var(--border)" stroke-width="1"/>
@@ -804,16 +890,46 @@ function svgLine(points){
     ${yLabels}${xLabels}
     <polygon points="${areaPts}" fill="url(#lg)"/>
     <polyline points="${linePts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    ${points.map((p,i)=>`<circle cx="${xs(i)}" cy="${ys(p.y)}" r="3" fill="var(--accent)"/>`).join('')}
+    ${dots}
+  </svg>`;
+}
+
+// ── SVG BAR CHART ──
+function svgBar(points){
+  const W=360,H=120,padL=40,padR=10,padT=10,padB=28;
+  const iW=W-padL-padR,iH=H-padT-padB;
+  const maxY=Math.max(...points.map(p=>p.y),1);
+  const bw=Math.max(4,Math.floor(iW/points.length*0.6));
+  const gap=iW/points.length;
+  const ys=v=>padT+iH-(v/maxY)*iH;
+  const yLabels=[0,Math.round(maxY/2),maxY].map(v=>`<text x="${padL-6}" y="${ys(v)+4}" text-anchor="end" font-size="9" fill="var(--t3)">${v}</text>`).join('');
+  const step=Math.max(1,Math.ceil(points.length/6));
+  const xLabels=points.filter((_,i)=>i%step===0||i===points.length-1).map(p=>{
+    const i=points.indexOf(p);
+    const x=padL+i*gap+gap/2;
+    return`<text x="${x}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--t3)">${fmtMonth(p.x)}</text>`;
+  }).join('');
+  const bars=points.map((p,i)=>{
+    const x=padL+i*gap+gap/2-bw/2;
+    const barH=Math.max(2,(p.y/maxY)*iH);
+    return`<rect x="${x}" y="${padT+iH-barH}" width="${bw}" height="${barH}" rx="2" fill="var(--accent)" opacity=".8"/>`;
+  }).join('');
+  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+iH}" stroke="var(--border)" stroke-width="1"/>
+    <line x1="${padL}" y1="${padT+iH}" x2="${padL+iW}" y2="${padT+iH}" stroke="var(--border)" stroke-width="1"/>
+    ${yLabels}${xLabels}${bars}
   </svg>`;
 }
 
 // ── HELPERS ──
 function fmt(n){return Number(n).toLocaleString('es-AR',{maximumFractionDigits:0});}
 function fmtTime(str){if(!str)return'—';const d=new Date(str.replace(' ','T')+(str.includes('T')?'':'-03:00'));return isNaN(d)?str:d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
-function fmtDateShort(s){if(!s||s.length<10)return s;const[y,m,d]=s.split('-');return`${d}/${m}`;}
+function fmtDateShort(s){if(!s||s.length<7)return s||'';const parts=s.split('-');return parts.length>=2?`${parts[2]||''}/${parts[1]||''}`:(s||'');}
+function fmtMonth(s){if(!s||s.length<7)return s;const[y,m]=s.split('-');const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return(ms[parseInt(m,10)-1]||m)+' '+y.slice(2);}
 function shortName(s){return s.length>28?s.slice(0,26)+'…':s;}
 function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showTip(e,text){const t=document.getElementById('chart-tooltip');t.textContent=text;t.style.display='block';t.style.left=(e.clientX+12)+'px';t.style.top=(e.clientY-28)+'px';}
+function hideTip(){document.getElementById('chart-tooltip').style.display='none';}
 </script>
 </body>
 </html>
