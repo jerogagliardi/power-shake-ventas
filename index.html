@@ -1,7 +1,4 @@
 
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -551,9 +548,9 @@ function renderAll() {
   const use = completed.length>0 ? completed : _filtered;
   document.getElementById('notice-cancel').style.display = (completed.length===0&&_filtered.length>0)?'block':'none';
 
-  // Para ingresos: solo los que realmente pagaron (excluye free/exchange)
+  // Para ingresos: solo los que realmente pagaron (excluye free/exchange/refunded)
   const paid = _filtered.filter(isPaid);
-  const total = use.filter(o=>o.status!==7).length;
+  const total = paid.length;
   const rev = paid.reduce((s,o)=>s+Number(o.payAmt||0),0);
   const avg = total?Math.round(rev/total):0;
 
@@ -954,6 +951,11 @@ function svgBar(points){
 // Órdenes que realmente generaron ingreso (excluye free, exchange, gratis, canje)
 function isPaid(o){
   if(o.status===7)return false;
+  // excluir reembolsados
+  const refund=(o.refundStatus||o.refundState||o.isRefund||'').toString().toLowerCase();
+  if(refund&&refund!=='0'&&refund!=='no'&&refund!=='none'&&refund!=='null')return false;
+  const sname=(o.statusName||'').toLowerCase();
+  if(sname.includes('refund'))return false;
   const pay=(o.payWayName||'').toLowerCase();
   if(pay.includes('exchange')||pay.includes('free')||pay.includes('gratis')||pay.includes('canje'))return false;
   return Number(o.payAmt||0)>0;
