@@ -639,6 +639,7 @@ const MACHINE_PHYSICAL_PRODUCTS = {
   ],
   'Thames sportclub': [
     { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Colágeno Frutos Rojos',     match: n => n.includes('frutos')||(n.includes('colag')&&n.includes('rojo')) },
     { label: 'Electrolitos',              match: n => n.includes('electrolito') },
     { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde')||n.includes('vascolag') },
     { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('te verde') },
