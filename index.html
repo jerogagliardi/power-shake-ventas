@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -343,10 +342,11 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
         <div class="ph"><div class="ph-icon i-amber">💰</div><div class="ph-title">Costo por producto</div><div class="ph-badge" id="r-pond-badge">Costo prom. pond.: —</div></div>
         <div class="tbl-wrap">
           <table class="stk-tbl">
-            <thead><tr><th>Producto</th><th>Vendidos</th><th style="width:160px">Costo por vaso (ARS)</th><th>Subtotal</th></tr></thead>
+            <thead><tr><th>Producto</th><th>Vendidos</th><th style="width:160px">Costo por vaso (ARS c/IVA)</th><th>Subtotal (c/IVA)</th></tr></thead>
             <tbody id="r-prod-body"><tr><td colspan="4" class="stk-empty">Cargá datos para ver los productos.</td></tr></tbody>
           </table>
         </div>
+        <div style="padding:6px 16px 10px;font-size:11px;color:var(--t3)">Los costos ingresados incluyen IVA. Para rentabilidad se usa costo ÷ 1,21 (neto sin IVA).</div>
       </div>
       <!-- Otros costos -->
       <div class="rent-inputs">
@@ -358,7 +358,7 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
               <input type="number" class="inp-money" id="r-admin" placeholder="0" min="0" max="100" step="0.1" oninput="renderRent()" style="flex:1">
               <span style="font-size:13px;color:var(--t2);font-weight:600">%</span>
             </div>
-            <div class="hint">% sobre los ingresos totales</div>
+            <div class="hint">% sobre precio final de venta</div>
           </div>
           <div class="rent-field">
             <label>Costos logística</label>
@@ -371,22 +371,58 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
             <div class="hint">ARS · honorarios del período</div>
           </div>
           <div class="rent-field">
+            <label>Ploteos c/IVA</label>
+            <input type="number" class="inp-money" id="r-ploteos" placeholder="0" min="0" oninput="renderRent()">
+            <div class="hint">Monto total facturado. Solo se usa su IVA crédito.</div>
+          </div>
+          <div class="rent-field">
+            <label>Fletes c/IVA</label>
+            <input type="number" class="inp-money" id="r-fletes" placeholder="0" min="0" oninput="renderRent()">
+            <div class="hint">Monto total facturado. Solo se usa su IVA crédito.</div>
+          </div>
+          <div class="rent-field">
+            <label>Costo vaso descartable</label>
+            <input type="number" class="inp-money" id="r-vaso-unit" placeholder="0" min="0" oninput="renderRent()">
+            <div class="hint">ARS c/u · incluye IVA</div>
+          </div>
+          <div class="rent-field">
+            <label>Costo agua</label>
+            <input type="number" class="inp-money" id="r-agua-unit" placeholder="0" min="0" oninput="renderRent()">
+            <div class="hint">ARS c/u · incluye IVA</div>
+          </div>
+          <div class="rent-field">
             <label>% Gimnasios</label>
             <input type="text" class="inp-money" value="15% automático" readonly style="color:var(--t2);cursor:default">
-            <div class="hint">15% sobre los ingresos totales</div>
+            <div class="hint">15% sobre precio final de venta</div>
           </div>
         </div>
       </div>
+      <!-- Tiles principales -->
       <div class="rent-tiles" id="rent-tiles">
-        <div class="rt"><div class="rt-label">Ingresos</div><div class="rt-value c-purple" id="r-ingreso">—</div><div class="rt-sub">ARS</div></div>
-        <div class="rt"><div class="rt-label">Costo vasos</div><div class="rt-value" id="r-cv" style="color:var(--amber)">—</div><div class="rt-sub">ARS · suma de todos los productos</div></div>
-        <div class="rt"><div class="rt-label">% Gimnasios</div><div class="rt-value" id="r-gym" style="color:var(--amber)">—</div><div class="rt-sub">15% de ingresos</div></div>
-        <div class="rt"><div class="rt-label">Total costos</div><div class="rt-value" id="r-total-cost" style="color:var(--red)">—</div><div class="rt-sub">ARS</div></div>
-        <div class="rt"><div class="rt-label">Ganancia neta</div><div class="rt-value c-green" id="r-ganancia">—</div><div class="rt-sub">ARS</div></div>
-        <div class="rt"><div class="rt-label">Margen</div><div class="rt-value c-accent" id="r-margen">—</div><div class="rt-sub">% sobre ingresos</div></div>
+        <div class="rt"><div class="rt-label">Ingresos brutos</div><div class="rt-value c-purple" id="r-ingreso">—</div><div class="rt-sub">Suma de ventas finales con IVA</div></div>
+        <div class="rt"><div class="rt-label">Ingresos netos s/IVA</div><div class="rt-value" id="r-ingreso-neto" style="color:var(--blue)">—</div><div class="rt-sub">Ingresos brutos ÷ 1,21</div></div>
+        <div class="rt"><div class="rt-label">IVA débito fiscal</div><div class="rt-value" id="r-iva" style="color:var(--t2)">—</div><div class="rt-sub">Ingresos brutos − ingresos netos</div></div>
+        <div class="rt"><div class="rt-label">Costo productos (neto)</div><div class="rt-value" id="r-cv" style="color:var(--amber)">—</div><div class="rt-sub">Costos cargados c/IVA ÷ 1,21</div></div>
+        <div class="rt"><div class="rt-label">% Gimnasios</div><div class="rt-value" id="r-gym" style="color:var(--amber)">—</div><div class="rt-sub">15% sobre ventas finales</div></div>
+        <div class="rt"><div class="rt-label">Cargo MP</div><div class="rt-value" id="r-mp" style="color:var(--amber)">—</div><div class="rt-sub">0,968% sobre ventas finales</div></div>
+        <div class="rt"><div class="rt-label">Total costos operativos</div><div class="rt-value" id="r-total-cost" style="color:var(--red)">—</div><div class="rt-sub">Productos + vasos + agua + gimnasio + MP + honorarios</div></div>
+        <div class="rt"><div class="rt-label">Ganancia operativa</div><div class="rt-value c-green" id="r-ganancia">—</div><div class="rt-sub">Ingresos netos − costos operativos</div></div>
+        <div class="rt"><div class="rt-label">Margen operativo</div><div class="rt-value c-accent" id="r-margen">—</div><div class="rt-sub">Ganancia operativa ÷ ingresos netos</div></div>
       </div>
+      <!-- Retenciones y flujo de caja -->
+      <div class="rent-breakdown" style="margin-top:14px;margin-bottom:14px">
+        <div class="rb-title">Retenciones impositivas · Flujo de caja MP</div>
+        <div id="rb-retenciones"></div>
+      </div>
+      <!-- Posición IVA estimada COSBRA -->
+      <div class="rent-breakdown" style="margin-bottom:14px;border-top:2px solid var(--border);padding-top:14px">
+        <div class="rb-title">Posición IVA estimada · COSBRA SRL</div>
+        <div id="rb-iva"></div>
+        <div style="padding:10px 0 2px;font-size:11px;color:var(--t3)">Estimación interna de la posición fiscal de COSBRA. No modifica la rentabilidad operativa de Power Shake.</div>
+      </div>
+      <!-- Distribución -->
       <div class="rent-breakdown">
-        <div class="rb-title">Distribución de costos</div>
+        <div class="rb-title">Distribución de costos operativos</div>
         <div id="rb-rows"></div>
       </div>
     </div>
@@ -637,7 +673,33 @@ const MACHINE_PHYSICAL_PRODUCTS = {
     { label: 'Pump V8',                    match: n => n.includes('pump')||n.includes('v8') },
     { label: 'Electrolitos',              match: n => n.includes('electrolito') },
     { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
-  ]
+  ],
+  'Thames sportclub': [
+    { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Colágeno Frutos Rojos',     match: n => n.includes('frutos')||(n.includes('colag')&&n.includes('rojo')) },
+    { label: 'Electrolitos',              match: n => n.includes('electrolito') },
+    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde')||n.includes('vascolag') },
+    { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('te verde') },
+    { label: 'Proteína Cookies',          match: n => n.includes('cookies') },
+    { label: 'Creatina',                  match: n => n.includes('creatina') },
+  ],
+  'Sporta': [
+    { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Electrolitos',              match: n => n.includes('electrolito') },
+    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde')||n.includes('vascolag') },
+    { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('te verde') },
+    { label: 'Proteína Cookies',          match: n => n.includes('cookies') },
+    { label: 'Creatina',                  match: n => n.includes('creatina') },
+    { label: 'Pump V8',                   match: n => n.includes('pump')||n.includes('v8') },
+  ],
+  'Arribeños sportclub': [
+    { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Colágeno Frutos Rojos',     match: n => n.includes('frutos')||(n.includes('colag')&&n.includes('rojo')) },
+    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
+    { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag') },
+    { label: 'Proteína Cookies',          match: n => n.includes('cookies')&&!n.includes('cream') },
+    { label: 'Electrolitos',              match: n => n.includes('electrolito') },
+  ],
 };
 
 function renderStock() {
@@ -797,7 +859,7 @@ function mapProductGroup(name) {
 
 // ── RENTABILIDAD ──
 function restoreRentInputs(){
-  ['r-admin','r-logistica','r-honorarios'].forEach(id=>{
+  ['r-admin','r-logistica','r-honorarios','r-ploteos','r-fletes','r-vaso-unit','r-agua-unit'].forEach(id=>{
     const v=localStorage.getItem('ps_'+id);
     if(v) document.getElementById(id).value=v;
   });
@@ -809,14 +871,20 @@ function setRentCosto(prod,val){
   try{localStorage.setItem('ps_costo__'+btoa(encodeURIComponent(prod)),val);}catch(e){}
 }
 function renderRent(){
-  ['r-admin','r-logistica','r-honorarios'].forEach(id=>{
+  ['r-admin','r-logistica','r-honorarios','r-ploteos','r-fletes','r-vaso-unit','r-agua-unit'].forEach(id=>{
     localStorage.setItem('ps_'+id, document.getElementById(id).value||'');
   });
+
+  const IVA = 1.21;
   const completed=_filtered.filter(o=>o.status!==7);
   const use=completed.length>0?completed:_filtered;
-  const ingresos=_filtered.filter(isPaid).reduce((s,o)=>s+Number(o.payAmt||0),0);
+  const paidOrders=_filtered.filter(isPaid);
+  const ingresos=paidOrders.reduce((s,o)=>s+Number(o.payAmt||0),0);
+  const totalVentas=paidOrders.length;
+  const ventaNeta=ingresos/IVA;
+  const ivaDebito=ingresos-ventaNeta;
 
-  // Per-product cost table — grouped by category
+  // Tabla de costos por producto — sin cambios: subtotal = costo manual × vendidos (c/IVA)
   const byProd={};
   use.forEach(o=>{
     const p=mapProductGroup(o.goodsName||'Desconocido');
@@ -825,12 +893,12 @@ function renderRent(){
   });
   const prodArr=Object.entries(byProd).sort((a,b)=>b[1]-a[1]);
 
-  let costoVasos=0;
+  let costoVasosBruto=0;
   let totalVasos=0;
   const prodRows=prodArr.map(([prod,count])=>{
     const costo=getRentCosto(prod);
     const sub=costo*count;
-    costoVasos+=sub;
+    costoVasosBruto+=sub;
     totalVasos+=count;
     const rid='rp_'+Math.random().toString(36).slice(2,8);
     return`<tr>
@@ -841,37 +909,112 @@ function renderRent(){
     </tr>`;
   }).join('');
 
-  const promPond = totalVasos>0 ? Math.round(costoVasos/totalVasos) : 0;
+  const promPond = totalVasos>0 ? Math.round(costoVasosBruto/totalVasos) : 0;
   document.getElementById('r-prod-body').innerHTML = prodArr.length===0
     ? '<tr><td colspan="4" class="stk-empty">Sin ventas en el período.</td></tr>'
-    : prodRows + `<tr style="border-top:2px solid var(--border);font-weight:700"><td colspan="2" style="color:var(--t2);font-size:12px">TOTAL · Prom. ponderado: $${fmt(promPond)}/vaso</td><td></td><td style="color:var(--amber);font-size:15px">$${fmt(costoVasos)}</td></tr>`;
+    : prodRows + `<tr style="border-top:2px solid var(--border);font-weight:700"><td colspan="2" style="color:var(--t2);font-size:12px">TOTAL · Prom. ponderado: $${fmt(promPond)}/vaso (c/IVA)</td><td></td><td style="color:var(--amber);font-size:15px">$${fmt(costoVasosBruto)}</td></tr>`;
   document.getElementById('r-pond-badge').textContent='Prom. pond.: $'+fmt(promPond)+'/vaso';
 
-  const adminPct=Number(document.getElementById('r-admin').value)||0;
-  const admin=Math.round(ingresos*adminPct/100);
-  const logistica=Number(document.getElementById('r-logistica').value)||0;
-  const honorarios=Number(document.getElementById('r-honorarios').value)||0;
-  const gym=Math.round(ingresos*0.15);
-  const totalCostos=costoVasos+admin+logistica+honorarios+gym;
-  const ganancia=ingresos-totalCostos;
-  const margen=ingresos>0?Math.round(ganancia/ingresos*100):0;
+  // ── Costos netos sin IVA (para rentabilidad) ──
+  const costoVasosNeto = costoVasosBruto / IVA;
+  const costoVasoUnit = Number(document.getElementById('r-vaso-unit').value)||0;
+  const costoAguaUnit = Number(document.getElementById('r-agua-unit').value)||0;
+  const vasoNeto = (costoVasoUnit * totalVentas) / IVA;
+  const aguaNeto = (costoAguaUnit * totalVentas) / IVA;
+  const ploteosBruto = Number(document.getElementById('r-ploteos').value)||0;
+  const fletesBruto = Number(document.getElementById('r-fletes').value)||0;
+  const ploteosNeto = ploteosBruto / IVA;
+  const fletesNeto = fletesBruto / IVA;
 
-  document.getElementById('r-ingreso').textContent='$'+fmt(ingresos);
-  document.getElementById('r-cv').textContent='$'+fmt(costoVasos);
-  document.getElementById('r-gym').textContent='$'+fmt(gym);
-  document.getElementById('r-total-cost').textContent='$'+fmt(totalCostos);
-  document.getElementById('r-ganancia').textContent='$'+fmt(ganancia);
-  document.getElementById('r-margen').textContent=margen+'%';
+  // ── IVA crédito fiscal por compras (solo para posición IVA, NO resta de rentabilidad) ──
+  const ivaCredProductos = costoVasosBruto - costoVasosNeto;
+  const ivaCredVaso = costoVasoUnit * totalVentas - vasoNeto;
+  const ivaCredAgua = costoAguaUnit * totalVentas - aguaNeto;
+  const ivaCredPloteos = ploteosBruto - ploteosNeto;
+  const ivaCredFletes = fletesBruto - fletesNeto;
+  const totalIvaCreditos = ivaCredProductos + ivaCredVaso + ivaCredAgua + ivaCredPloteos + ivaCredFletes;
+  const posicionIVA = ivaDebito - totalIvaCreditos;
 
-  const items=[
-    {name:'Costo vasos ('+totalVasos+' u.)',val:costoVasos,color:'var(--amber)'},
-    {name:'% Gimnasios (15%)',val:gym,color:'var(--amber)'},
-    {name:`Costos admin (${adminPct}%)`,val:admin,color:'var(--amber)'},
-    {name:'Costos logística',val:logistica,color:'var(--amber)'},
-    {name:'Honorarios',val:honorarios,color:'var(--amber)'},
-    {name:'Ganancia neta',val:Math.max(0,ganancia),color:'var(--green)',bold:true},
+  // ── Costos operativos (todos netos sin IVA) ──
+  const gym = ingresos * 0.15;
+  const cargoMP = ingresos * 0.00968;
+  const retencionIIBB = ingresos * 0.025;
+  const impDebCred = ingresos * 0.006;
+  const adminPct = Number(document.getElementById('r-admin').value)||0;
+  const admin = ingresos * adminPct / 100;
+  const logistica = Number(document.getElementById('r-logistica').value)||0;
+  const honorarios = Number(document.getElementById('r-honorarios').value)||0;
+
+  const totalCostosOp = costoVasosNeto + vasoNeto + aguaNeto + gym + cargoMP + admin + logistica + honorarios;
+  const gananciaOp = ventaNeta - totalCostosOp;
+  const margenOp = ventaNeta > 0 ? Math.round(gananciaOp / ventaNeta * 100) : 0;
+  const flujoMP = ingresos - cargoMP - retencionIIBB - impDebCred;
+
+  // ── Tiles ──
+  document.getElementById('r-ingreso').textContent='$'+fmt(Math.round(ingresos));
+  document.getElementById('r-ingreso-neto').textContent='$'+fmt(Math.round(ventaNeta));
+  document.getElementById('r-iva').textContent='$'+fmt(Math.round(ivaDebito));
+  document.getElementById('r-cv').textContent='$'+fmt(Math.round(costoVasosNeto));
+  document.getElementById('r-gym').textContent='$'+fmt(Math.round(gym));
+  document.getElementById('r-mp').textContent='$'+fmt(Math.round(cargoMP));
+  document.getElementById('r-total-cost').textContent='$'+fmt(Math.round(totalCostosOp));
+  document.getElementById('r-ganancia').textContent='$'+fmt(Math.round(gananciaOp));
+  document.getElementById('r-margen').textContent=margenOp+'%';
+
+  // ── Retenciones y flujo de caja ──
+  const maxI=Math.max(ingresos,1);
+  document.getElementById('rb-retenciones').innerHTML=`
+    <div class="rb-row">
+      <div class="rb-name">Retención IIBB (2,5%) · pago a cuenta</div>
+      <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.round(retencionIIBB/maxI*100)}%;background:var(--t2)"></div></div>
+      <div class="rb-val" style="color:var(--t2)">$${fmt(Math.round(retencionIIBB))}</div>
+    </div>
+    <div class="rb-row">
+      <div class="rb-name">Imp. débitos/créditos (0,6%) · pago a cuenta</div>
+      <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.round(impDebCred/maxI*100)}%;background:var(--t2)"></div></div>
+      <div class="rb-val" style="color:var(--t2)">$${fmt(Math.round(impDebCred))}</div>
+    </div>
+    <div class="rb-row" style="border-top:1px solid var(--border);padding-top:10px;font-weight:700">
+      <div class="rb-name" style="color:var(--text)">Flujo neto cobrado MP</div>
+      <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.round(flujoMP/maxI*100)}%;background:var(--blue)"></div></div>
+      <div class="rb-val" style="color:var(--blue)">$${fmt(Math.round(flujoMP))}</div>
+    </div>`;
+
+  // ── Posición IVA estimada ──
+  const ivaPositivo = posicionIVA >= 0;
+  const ivaColor = ivaPositivo ? 'var(--red)' : 'var(--green)';
+  const ivaLabel = ivaPositivo ? 'IVA estimado a pagar' : 'Saldo técnico estimado a favor';
+  const ivaItems=[
+    {name:'IVA débito fiscal · ventas',val:Math.round(ivaDebito),color:'var(--red)',sub:'Ingresos brutos − ingresos netos'},
   ];
-  const maxV=Math.max(ingresos,1);
+  if(ivaCredProductos>0) ivaItems.push({name:'IVA crédito · productos',val:Math.round(ivaCredProductos),color:'var(--green)',sub:'Costos c/IVA − costos netos',cred:true});
+  if(ivaCredVaso>0) ivaItems.push({name:'IVA crédito · vasos descartables',val:Math.round(ivaCredVaso),color:'var(--green)',sub:'Vasos c/IVA − vasos netos',cred:true});
+  if(ivaCredAgua>0) ivaItems.push({name:'IVA crédito · agua',val:Math.round(ivaCredAgua),color:'var(--green)',sub:'Agua c/IVA − agua neta',cred:true});
+  if(ivaCredPloteos>0) ivaItems.push({name:'IVA crédito · ploteos',val:Math.round(ivaCredPloteos),color:'var(--green)',sub:'Ploteos c/IVA − ploteos netos',cred:true});
+  if(ivaCredFletes>0) ivaItems.push({name:'IVA crédito · fletes',val:Math.round(ivaCredFletes),color:'var(--green)',sub:'Fletes c/IVA − fletes netos',cred:true});
+  const maxIVA=Math.max(ivaDebito,1);
+  document.getElementById('rb-iva').innerHTML=ivaItems.map(it=>`<div class="rb-row">
+    <div><div class="rb-name">${it.name}${it.cred?' <span style="color:var(--t3);font-size:10px">▲ crédito</span>':''}</div><div style="font-size:10px;color:var(--t3);margin-top:1px">${it.sub}</div></div>
+    <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.round(it.val/maxIVA*100)}%;background:${it.color}"></div></div>
+    <div class="rb-val" style="color:${it.color}">${it.cred?'−':''}$${fmt(it.val)}</div>
+  </div>`).join('')+`<div class="rb-row" style="border-top:2px solid var(--border);padding-top:10px;font-weight:700">
+    <div><div class="rb-name" style="color:${ivaColor}">${ivaLabel}</div><div style="font-size:10px;color:var(--t3);margin-top:1px">IVA débito − créditos fiscales</div></div>
+    <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.min(100,Math.round(Math.abs(posicionIVA)/maxIVA*100))}%;background:${ivaColor}"></div></div>
+    <div class="rb-val" style="color:${ivaColor}">$${fmt(Math.abs(Math.round(posicionIVA)))}</div>
+  </div>`;
+
+  // ── Distribución de costos operativos ──
+  const items=[{name:'Costo productos neto ('+totalVasos+' u.)',val:Math.round(costoVasosNeto),color:'var(--amber)'}];
+  if(vasoNeto>0) items.push({name:'Vasos descartables ('+totalVentas+' u.) neto',val:Math.round(vasoNeto),color:'var(--amber)'});
+  if(aguaNeto>0) items.push({name:'Agua ('+totalVentas+' u.) neto',val:Math.round(aguaNeto),color:'var(--amber)'});
+  items.push({name:'% Gimnasios (15% s/precio final)',val:Math.round(gym),color:'var(--amber)'});
+  items.push({name:'Cargo MP (0,968%)',val:Math.round(cargoMP),color:'var(--amber)'});
+  if(admin>0) items.push({name:`Costos admin (${adminPct}%)`,val:Math.round(admin),color:'var(--amber)'});
+  if(logistica>0) items.push({name:'Costos logística',val:Math.round(logistica),color:'var(--amber)'});
+  if(honorarios>0) items.push({name:'Honorarios',val:Math.round(honorarios),color:'var(--amber)'});
+  items.push({name:'Ganancia operativa',val:Math.max(0,Math.round(gananciaOp)),color:'var(--green)',bold:true});
+
+  const maxV=Math.max(ventaNeta,1);
   document.getElementById('rb-rows').innerHTML=items.map(it=>`<div class="rb-row" style="${it.bold?'font-weight:700':''}">
     <div class="rb-name" style="${it.bold?'color:var(--text)':''}">${it.name}</div>
     <div class="rb-bar-track"><div class="rb-bar-fill" style="width:${Math.round(it.val/maxV*100)}%;background:${it.color}"></div></div>
