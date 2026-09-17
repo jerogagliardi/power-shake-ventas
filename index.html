@@ -215,8 +215,16 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
       <div class="ss"><span class="ss-n">1</span><span>Abrí el GS Smart System → <strong style="color:var(--text)">Order Management</strong></span></div>
       <div class="ss"><span class="ss-n">2</span><span>Presioná <strong style="color:var(--text)">Fn+F12</strong> → pestaña <strong style="color:var(--text)">Console</strong></span></div>
       <div class="ss"><span class="ss-n">3</span><span>Escribí <strong style="color:var(--accent)">allow pasting</strong> + Enter</span></div>
-      <div class="ss"><span class="ss-n">4</span><span>Pegá el código + Enter → se abre el dashboard</span></div>
+      <div class="ss"><span class="ss-n">4</span><span>Pegá el código + Enter → se descarga <strong style="color:var(--accent)">ventas.json</strong></span></div>
+      <div class="ss"><span class="ss-n">5</span><span>Volvé acá y subí el archivo con el botón de abajo</span></div>
     </div>
+  </div>
+  <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:18px">
+    <div class="code-label" style="margin-bottom:10px">Ya tenés el archivo? Subilo acá:</div>
+    <label class="btn-primary" style="cursor:pointer;display:inline-block">
+      📂 Subir ventas.json
+      <input type="file" accept=".json" style="display:none" onchange="loadFile(event)">
+    </label>
   </div>
 </div>
 </div>
@@ -473,7 +481,7 @@ let _machines = [];
 // ── SETUP ──
 function genCode() {
   const url = location.href.split('#')[0];
-  const code = `(async function(){try{var rows=[],p=1,more=true;while(more){var res=await window.axios.get('api/coffee/order/page',{params:{size:500,current:p,startDate:'2020-01-01',endDate:new Date().toISOString().slice(0,10)}});var rr=res.data&&res.data.data&&res.data.data.records||[];rows=rows.concat(rr);if(rr.length<500)more=false;else p++;}var enc=btoa(unescape(encodeURIComponent(JSON.stringify(rows))));location.href='${url}#data='+enc;}catch(ex){alert('Error: '+ex.message);}})()`;
+  const code = `(async function(){try{var rows=[],p=1,more=true;while(more){var res=await window.axios.get('api/coffee/order/page',{params:{size:500,current:p,startDate:'2020-01-01',endDate:new Date().toISOString().slice(0,10)}});var rr=res.data&&res.data.data&&res.data.data.records||[];rows=rows.concat(rr);if(rr.length<500)more=false;else p++;}var blob=new Blob([JSON.stringify(rows)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ventas.json';document.body.appendChild(a);a.click();a.remove();alert('Archivo ventas.json descargado! Ahora subilo en el dashboard de Power Shake.');}catch(ex){alert('Error: '+ex.message);}})()`;
   document.getElementById('code-out').value = code;
   document.getElementById('code-box').style.display = 'block';
 }
@@ -506,6 +514,21 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   showSetup();
 });
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const orders = JSON.parse(e.target.result);
+      initDashboard(orders);
+    } catch(err) {
+      alert('Error al leer el archivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
 
 function showSetup() {
   document.getElementById('setup').style.display = 'flex';
