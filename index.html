@@ -473,7 +473,7 @@ let _machines = [];
 // ── SETUP ──
 function genCode() {
   const url = location.href.split('#')[0];
-  const code = `(async function(){try{var rows=[],p=1,more=true;while(more){var res=await window.axios.get('api/coffee/order/page',{params:{size:500,current:p,startDate:'2020-01-01',endDate:new Date().toISOString().slice(0,10)}});var rr=res.data&&res.data.data&&res.data.data.records||[];rows=rows.concat(rr);if(rr.length<500)more=false;else p++;}var enc=btoa(unescape(encodeURIComponent(JSON.stringify(rows))));window.open('${url}#data='+enc,'_blank');}catch(ex){alert('Error: '+ex.message);}})()`;
+  const code = `(async function(){try{var rows=[],p=1,more=true;while(more){var res=await window.axios.get('api/coffee/order/page',{params:{size:500,current:p,startDate:'2020-01-01',endDate:new Date().toISOString().slice(0,10)}});var rr=res.data&&res.data.data&&res.data.data.records||[];rows=rows.concat(rr);if(rr.length<500)more=false;else p++;}var enc=btoa(unescape(encodeURIComponent(JSON.stringify(rows))));location.href='${url}#data='+enc;}catch(ex){alert('Error: '+ex.message);}})()`;
   document.getElementById('code-out').value = code;
   document.getElementById('code-box').style.display = 'block';
 }
