@@ -718,8 +718,8 @@ const MACHINE_PHYSICAL_PRODUCTS = {
   'Arribeños sportclub': [
     { label: 'Colágeno + Proteína Choco', match: n => n.includes('colag')&&(n.includes('choco')||n.includes('chocolate')) },
     { label: 'Colágeno Frutos Rojos',     match: n => n.includes('frutos')||(n.includes('colag')&&n.includes('rojo')) },
-    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
-    { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag') },
+    { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde') },
+    { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('te verde') },
     { label: 'Proteína Cookies',          match: n => n.includes('cookies') },
     { label: 'Electrolitos',              match: n => n.includes('electrolito') },
   ],
