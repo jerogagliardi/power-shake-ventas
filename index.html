@@ -690,7 +690,7 @@ function stkSetMachine(m) {
 const MACHINE_PHYSICAL_PRODUCTS = {
   'Sport club Cuyo': [
     { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
-    { label: 'Proteína Cookies',           match: n => n.includes('cookies')&&!n.includes('cream') },
+    { label: 'Proteína Cookies',           match: n => n.includes('cookies') },
     { label: 'Proteína Vainilla',          match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag') },
     { label: 'Creatina',                   match: n => n.includes('creatina') },
     { label: 'Pump V8',                    match: n => n.includes('pump')||n.includes('v8') },
@@ -720,7 +720,7 @@ const MACHINE_PHYSICAL_PRODUCTS = {
     { label: 'Colágeno Frutos Rojos',     match: n => n.includes('frutos')||(n.includes('colag')&&n.includes('rojo')) },
     { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
     { label: 'Proteína Vainilla',         match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag') },
-    { label: 'Proteína Cookies',          match: n => n.includes('cookies')&&!n.includes('cream') },
+    { label: 'Proteína Cookies',          match: n => n.includes('cookies') },
     { label: 'Electrolitos',              match: n => n.includes('electrolito') },
   ],
 };
