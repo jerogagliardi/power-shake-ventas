@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -163,6 +162,11 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
 .rt-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:6px}
 .rt-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.8px}
 .rt-sub{font-size:11px;color:var(--t3);margin-top:3px}
+
+/* ── IVA + CASH FLOW TILES ── nuevos */
+.rt.rt-iva-sep{border-top:3px solid var(--accent)}
+.rt-section-header{grid-column:1/-1;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);padding:6px 2px 2px;border-top:1px solid var(--border);margin-top:6px}
+
 .rent-breakdown{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:var(--sh)}
 .rb-title{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
 .rb-row{display:grid;grid-template-columns:160px 1fr 120px;align-items:center;gap:10px;margin-bottom:10px}
@@ -201,7 +205,7 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
 
 <div id="chart-tooltip"></div>
 <!-- ══ SETUP ══ -->
-<div id="setup">
+<div id="setup" style="display: flex;">
 <div class="setup-card">
   <div class="logo"><div class="logo-icon">🥤</div><div class="logo-text">Power <span>Shake</span></div></div>
   <div class="setup-title">Cargar datos</div>
@@ -230,7 +234,7 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
 </div>
 
 <!-- ══ APP ══ -->
-<div id="app">
+<div id="app" style="display: none;">
   <div class="topbar">
     <div class="topbar-logo"><div class="topbar-logo-icon">🥤</div>Power <span>Shake</span></div>
     <div class="filter-bar">
@@ -405,24 +409,36 @@ td.amt{font-variant-numeric:tabular-nums;font-weight:600;color:var(--green)}
           </div>
         </div>
       </div>
-      <!-- Tiles principales -->
+
+      <!-- ── TILES PRINCIPALES ── -->
       <div class="rent-tiles" id="rent-tiles">
+        <!-- Ingresos -->
         <div class="rt"><div class="rt-label">Ingresos brutos</div><div class="rt-value c-purple" id="r-ingreso">—</div><div class="rt-sub">Suma de ventas finales con IVA</div></div>
         <div class="rt"><div class="rt-label">Ingresos netos s/IVA</div><div class="rt-value" id="r-ingreso-neto" style="color:var(--blue)">—</div><div class="rt-sub">Ingresos brutos ÷ 1,21</div></div>
         <div class="rt"><div class="rt-label">IVA débito fiscal</div><div class="rt-value" id="r-iva" style="color:var(--t2)">—</div><div class="rt-sub">Ingresos brutos − ingresos netos</div></div>
+        <!-- Costos -->
         <div class="rt"><div class="rt-label">Costo productos (neto)</div><div class="rt-value" id="r-cv" style="color:var(--amber)">—</div><div class="rt-sub">Costos cargados c/IVA ÷ 1,21</div></div>
         <div class="rt"><div class="rt-label">% Gimnasios</div><div class="rt-value" id="r-gym" style="color:var(--amber)">—</div><div class="rt-sub">15% sobre ventas finales</div></div>
         <div class="rt"><div class="rt-label">Cargo MP</div><div class="rt-value" id="r-mp" style="color:var(--amber)">—</div><div class="rt-sub">0,968% sobre ventas finales</div></div>
         <div class="rt"><div class="rt-label">Total costos operativos</div><div class="rt-value" id="r-total-cost" style="color:var(--red)">—</div><div class="rt-sub">Productos + vasos + agua + gimnasio + MP + honorarios</div></div>
         <div class="rt"><div class="rt-label">Ganancia operativa</div><div class="rt-value c-green" id="r-ganancia">—</div><div class="rt-sub">Ingresos netos − costos operativos</div></div>
         <div class="rt"><div class="rt-label">Margen operativo</div><div class="rt-value c-accent" id="r-margen">—</div><div class="rt-sub">Ganancia operativa ÷ ingresos netos</div></div>
+
+        <!-- ── NUEVOS: Posición IVA + Cash Flow Real ── -->
+        <div class="rt rt-iva-sep" style="grid-column:1/-1;padding:8px 16px 4px;background:var(--s2)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t2)">Posición de IVA · Cash Flow Real</div>
+        </div>
+        <div class="rt rt-iva-sep"><div class="rt-label">IVA Crédito Fiscal</div><div class="rt-value" id="r-iva-credito" style="color:var(--green)">—</div><div class="rt-sub">IVA recuperable de tus compras</div></div>
+        <div class="rt rt-iva-sep" id="r-posicion-tile"><div class="rt-label">Posición Neta IVA</div><div class="rt-value" id="r-posicion-neta">—</div><div class="rt-sub" id="r-posicion-sub">débito − crédito</div></div>
+        <div class="rt rt-iva-sep"><div class="rt-label">Cash Flow Real</div><div class="rt-value" id="r-cashflow" style="color:var(--purple)">—</div><div class="rt-sub" id="r-cashflow-sub">ganancia − pago neto AFIP</div></div>
       </div>
+
       <!-- Retenciones y flujo de caja -->
       <div class="rent-breakdown" style="margin-top:14px;margin-bottom:14px">
         <div class="rb-title">Retenciones impositivas · Flujo de caja MP</div>
         <div id="rb-retenciones"></div>
       </div>
-      <!-- Posición IVA estimada COSBRA -->
+      <!-- Posición IVA detalle -->
       <div class="rent-breakdown" style="margin-bottom:14px;border-top:2px solid var(--border);padding-top:14px">
         <div class="rb-title">Posición IVA estimada · COSBRA SRL</div>
         <div id="rb-iva"></div>
@@ -540,7 +556,6 @@ function initDashboard(orders) {
   _all = orders.sort((a,b)=>new Date(a.createTime)-new Date(b.createTime));
   _machines = [...new Set(_all.map(o=>o.deviceName||o.merchantName||'Desconocida'))].sort();
 
-  // Build machine tabs for stock
   _stkMachine = _machines[0] || '';
   const tabs = document.getElementById('stk-tabs');
   tabs.innerHTML = _machines.map((m,i)=>`<button class="stk-tab${i===0?' active':''}" onclick="stkSetMachine('${esc(m)}')" id="stktab_${i}">${esc(m)}</button>`).join('');
@@ -608,7 +623,6 @@ function renderAll() {
   const use = completed.length>0 ? completed : _filtered;
   document.getElementById('notice-cancel').style.display = (completed.length===0&&_filtered.length>0)?'block':'none';
 
-  // Para ingresos: solo los que realmente pagaron (excluye free/exchange/refunded)
   const paid = _filtered.filter(isPaid);
   const total = paid.length;
   const rev = paid.reduce((s,o)=>s+Number(o.payAmt||0),0);
@@ -640,7 +654,6 @@ function renderAll() {
 
 // ── VENTAS ──
 function renderVentas(use, all, byProd, byMach) {
-  // Pie chart (products)
   const prodArr = Object.entries(byProd).sort((a,b)=>b[1].rev-a[1].rev);
   const totalRev = prodArr.reduce((s,[,d])=>s+d.rev,0);
   const pieData = prodArr.map(([n,d],i)=>({label:n,value:d.rev,color:COLORS[i%COLORS.length]}));
@@ -648,7 +661,6 @@ function renderVentas(use, all, byProd, byMach) {
     ? '<div class="empty"><div class="empty-icon">🥧</div>Sin datos</div>'
     : svgDonut(pieData,130) + `<div class="legend">${pieData.slice(0,6).map(d=>`<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><div class="legend-name">${esc(shortName(d.label))}</div><div class="legend-val" style="color:${d.color}">${totalRev>0?Math.round(d.value/totalRev*100):0}%</div></div>`).join('')}</div>`;
 
-  // Line chart (sales per day)
   const byDay = {};
   use.forEach(o=>{const d=orderDate(o);if(d)byDay[d]=(byDay[d]||0)+1;});
   const days = Object.keys(byDay).sort();
@@ -656,20 +668,17 @@ function renderVentas(use, all, byProd, byMach) {
     ? `<div class="no-chart">${days.length===1?`<strong>${byDay[days[0]]}</strong> ventas el ${fmtDateShort(days[0])}`:'Sin datos para el gráfico'}</div>`
     : svgLine(days.map(d=>({x:d,y:byDay[d]})));
 
-  // Products panel
   const maxR = Math.max(...prodArr.map(([,d])=>d.rev),1);
   document.getElementById('c-prod').textContent=prodArr.length+' producto'+(prodArr.length!==1?'s':'');
   document.getElementById('b-prod').innerHTML=prodArr.length===0?'<div class="empty"><div class="empty-icon">📦</div>Sin ventas</div>':
     prodArr.map(([n,d],i)=>`<div class="item-row"><div><div class="item-name">${esc(n)}</div><div class="item-bar-track"><div class="item-bar-fill" style="width:${Math.round(d.rev/maxR*100)}%;background:${COLORS[i%COLORS.length]}"></div></div></div><div class="item-stats"><div class="item-amount" style="color:${COLORS[i%COLORS.length]}">$${fmt(d.rev)}</div><div class="item-units">${d.count} venta${d.count!==1?'s':''}</div></div></div>`).join('');
 
-  // Machines panel
   const machArr=Object.entries(byMach).sort((a,b)=>b[1].rev-a[1].rev);
   const maxMR=Math.max(...machArr.map(([,d])=>d.rev),1);
   document.getElementById('c-mach').textContent=machArr.length+' máquina'+(machArr.length!==1?'s':'');
   document.getElementById('b-mach').innerHTML=machArr.length===0?'<div class="empty"><div class="empty-icon">📍</div>Sin ventas</div>':
     machArr.map(([m,d],i)=>`<div class="item-row"><div><div class="item-name">${esc(m)}</div><div class="item-bar-track"><div class="item-bar-fill" style="width:${Math.round(d.rev/maxMR*100)}%;background:${COLORS[i%COLORS.length]}"></div></div></div><div class="item-stats"><div class="item-amount" style="color:${COLORS[i%COLORS.length]}">$${fmt(d.rev)}</div><div class="item-units">${d.count} venta${d.count!==1?'s':''}</div></div></div>`).join('');
 
-  // Table
   document.getElementById('c-ord').textContent=all.length+' orden'+(all.length!==1?'es':'');
   document.getElementById('b-ord').innerHTML=all.length===0?'<tr><td colspan="7"><div class="empty">Sin órdenes</div></td></tr>':
     all.map(o=>{const st=o.status;const cls=st===7?'b-cancel':(st>=1&&st<=3?'b-ok':'b-other');return`<tr><td class="mono">${esc((o.orderNo||'').slice(-10))}</td><td>${esc(o.deviceName||o.merchantName||'—')}</td><td>${esc(o.goodsName||'—')}</td><td class="amt">$${fmt(Number(o.payAmt||0))}</td><td>${esc(o.payWayName||'—')}</td><td class="mono">${fmtTime(o.createTime)}</td><td><span class="badge ${cls}">${esc(o.statusName||String(st))}</span></td></tr>`;}).join('');
@@ -686,7 +695,6 @@ function stkSetMachine(m) {
   renderStock();
 }
 
-// Productos físicos fijos por máquina (keyword matching)
 const MACHINE_PHYSICAL_PRODUCTS = {
   'Sport club Cuyo': [
     { label: 'Proteína 3 en 1',           match: n => n.includes('3 en 1')||n.includes('1 en 3')||(n.includes('te verde')&&!n.includes('colag')) },
@@ -740,11 +748,9 @@ function renderStock() {
   const physProds = MACHINE_PHYSICAL_PRODUCTS[machine];
 
   if (physProds) {
-    // Máquina con productos físicos definidos — matching por palabras clave
     document.getElementById('stk-badge').textContent=physProds.length+' producto'+(physProds.length!==1?'s':'');
     body.innerHTML = physProds.map(p=>stkPhysicalRow(machine,p)).join('');
   } else {
-    // Máquinas auto: top 8 por nombre exacto
     const prodCount={};
     _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7).forEach(o=>{
       const p=o.goodsName||'Desconocido';
@@ -766,7 +772,6 @@ function stkPhysicalRow(machine, physProd) {
   const cap = s&&s.capacity?s.capacity:32;
   const repDate = s?s.repDate||'':'';
   const repQty = s&&s.qty?s.qty:cap;
-  // Contar ventas por keyword matching (un combo puede contar para múltiples físicos)
   const sold = repDate ? _all.filter(o=>{
     if((o.deviceName||o.merchantName||'Desconocida')!==machine) return false;
     if(o.status===7) return false;
@@ -818,7 +823,6 @@ function stkInsumoRow(machine, ins) {
   const repDate = s?s.repDate||'':'';
   const repQty = s&&s.qty?s.qty:80;
   const cap = repQty;
-  // Count ALL sales (every vaso/agua used = 1 venta) since repDate
   const sold = repDate ? _all.filter(o=>(o.deviceName||o.merchantName||'Desconocida')===machine&&o.status!==7&&orderDate(o)>=repDate).length : null;
   const avail = sold!==null ? Math.max(0, repQty-sold) : null;
   const pct = (avail!==null&&cap>0) ? Math.round(avail/cap*100) : null;
@@ -856,7 +860,7 @@ function doReponerInsumo(machine,ins,rid){
   renderStock();
 }
 
-// ── PRODUCT GROUP MAPPING (solo para Rentabilidad) ──
+// ── PRODUCT GROUP MAPPING ──
 function mapProductGroup(name) {
   const n = (name||'').toLowerCase();
   if (n.includes('frutos rojos') || (n.includes('vital') && n.includes('colag')))
@@ -865,10 +869,8 @@ function mapProductGroup(name) {
     return 'Pump V8';
   if (n.includes('electrolito'))
     return 'Electrolitos';
-  // Proteína 3 en 1: solo si tiene "te verde", "3 en 1" o "1 en 3" explícitamente
   if (n.includes('te verde') || n.includes('3 en 1') || n.includes('1 en 3'))
     return 'Proteína 3 en 1';
-  // Collagen Whey (colágeno + proteína de chocolate o vainilla)
   if (n.includes('collagen') || (n.includes('colag') && (n.includes('chocolate') || n.includes('choco') || n.includes('vainilla') || n.includes('whey'))))
     return 'Colágeno + Prote Choco/Vainilla';
   if ((n.includes('platinum') || n.includes('whey') || n.includes('vainilla') || n.includes('cookies')) && n.includes('creatina'))
@@ -907,7 +909,6 @@ function renderRent(){
   const ventaNeta=ingresos/IVA;
   const ivaDebito=ingresos-ventaNeta;
 
-  // Tabla de costos por producto — sin cambios: subtotal = costo manual × vendidos (c/IVA)
   const byProd={};
   use.forEach(o=>{
     const p=mapProductGroup(o.goodsName||'Desconocido');
@@ -938,7 +939,7 @@ function renderRent(){
     : prodRows + `<tr style="border-top:2px solid var(--border);font-weight:700"><td colspan="2" style="color:var(--t2);font-size:12px">TOTAL · Prom. ponderado: $${fmt(promPond)}/vaso (c/IVA)</td><td></td><td style="color:var(--amber);font-size:15px">$${fmt(costoVasosBruto)}</td></tr>`;
   document.getElementById('r-pond-badge').textContent='Prom. pond.: $'+fmt(promPond)+'/vaso';
 
-  // ── Costos netos sin IVA (para rentabilidad) ──
+  // ── Costos netos sin IVA ──
   const costoVasosNeto = costoVasosBruto / IVA;
   const costoVasoUnit = Number(document.getElementById('r-vaso-unit').value)||0;
   const costoAguaUnit = Number(document.getElementById('r-agua-unit').value)||0;
@@ -949,7 +950,7 @@ function renderRent(){
   const ploteosNeto = ploteosBruto / IVA;
   const fletesNeto = fletesBruto / IVA;
 
-  // ── IVA crédito fiscal por compras (solo para posición IVA, NO resta de rentabilidad) ──
+  // ── IVA crédito fiscal ──
   const ivaCredProductos = costoVasosBruto - costoVasosNeto;
   const ivaCredVaso = costoVasoUnit * totalVentas - vasoNeto;
   const ivaCredAgua = costoAguaUnit * totalVentas - aguaNeto;
@@ -958,7 +959,7 @@ function renderRent(){
   const totalIvaCreditos = ivaCredProductos + ivaCredVaso + ivaCredAgua + ivaCredPloteos + ivaCredFletes;
   const posicionIVA = ivaDebito - totalIvaCreditos;
 
-  // ── Costos operativos (todos netos sin IVA) ──
+  // ── Costos operativos ──
   const gym = ingresos * 0.15;
   const cargoMP = ingresos * 0.00968;
   const retencionIIBB = ingresos * 0.025;
@@ -973,7 +974,10 @@ function renderRent(){
   const margenOp = ventaNeta > 0 ? Math.round(gananciaOp / ventaNeta * 100) : 0;
   const flujoMP = ingresos - cargoMP - retencionIIBB - impDebCred;
 
-  // ── Tiles ──
+  // ── Cash Flow Real ──
+  const cashFlow = gananciaOp - Math.max(0, posicionIVA);
+
+  // ── Tiles existentes ──
   document.getElementById('r-ingreso').textContent='$'+fmt(Math.round(ingresos));
   document.getElementById('r-ingreso-neto').textContent='$'+fmt(Math.round(ventaNeta));
   document.getElementById('r-iva').textContent='$'+fmt(Math.round(ivaDebito));
@@ -984,7 +988,29 @@ function renderRent(){
   document.getElementById('r-ganancia').textContent='$'+fmt(Math.round(gananciaOp));
   document.getElementById('r-margen').textContent=margenOp+'%';
 
-  // ── Retenciones y flujo de caja ──
+  // ── NUEVOS TILES: IVA Crédito, Posición Neta, Cash Flow Real ──
+  document.getElementById('r-iva-credito').textContent = '$'+fmt(Math.round(totalIvaCreditos));
+
+  const posEl  = document.getElementById('r-posicion-neta');
+  const posSub = document.getElementById('r-posicion-sub');
+  if (posicionIVA > 0) {
+    posEl.textContent = '$'+fmt(Math.round(posicionIVA));
+    posEl.style.color = 'var(--red)';
+    posSub.textContent = 'A pagar a AFIP';
+  } else {
+    posEl.textContent = '$'+fmt(Math.round(Math.abs(posicionIVA)));
+    posEl.style.color = 'var(--green)';
+    posSub.textContent = 'Saldo a favor — no pagás AFIP';
+  }
+
+  const cfEl  = document.getElementById('r-cashflow');
+  const cfSub = document.getElementById('r-cashflow-sub');
+  cfEl.textContent = '$'+fmt(Math.round(cashFlow));
+  cfSub.textContent = posicionIVA <= 0
+    ? 'Ganancia operativa (no pagás IVA a AFIP)'
+    : `ganancia $${fmt(Math.round(gananciaOp))} − pago AFIP $${fmt(Math.round(posicionIVA))}`;
+
+  // ── Retenciones ──
   const maxI=Math.max(ingresos,1);
   document.getElementById('rb-retenciones').innerHTML=`
     <div class="rb-row">
@@ -1003,7 +1029,7 @@ function renderRent(){
       <div class="rb-val" style="color:var(--blue)">$${fmt(Math.round(flujoMP))}</div>
     </div>`;
 
-  // ── Posición IVA estimada ──
+  // ── Posición IVA detalle (barras) ──
   const ivaPositivo = posicionIVA >= 0;
   const ivaColor = ivaPositivo ? 'var(--red)' : 'var(--green)';
   const ivaLabel = ivaPositivo ? 'IVA estimado a pagar' : 'Saldo técnico estimado a favor';
@@ -1052,7 +1078,6 @@ function renderComp(byProd,byMach){
   if(topP){document.getElementById('star-prod').textContent=shortName(topP[0]);document.getElementById('star-prod-stat').textContent='$'+fmt(topP[1].rev)+' · '+topP[1].count+' ventas';}
   if(topM){document.getElementById('star-mach').textContent=topM[0];document.getElementById('star-mach-stat').textContent='$'+fmt(topM[1].rev)+' · '+topM[1].count+' ventas';}
 
-  // Monthly charts — use ALL orders (ignores date filter, shows full history)
   const byMonth={};
   _all.filter(o=>o.status!==7).forEach(o=>{
     const m=orderMonth(o); if(!m) return;
@@ -1111,20 +1136,14 @@ function svgLine(points){
   const maxY=Math.max(...points.map(p=>p.y),1);
   const xs=i=>(padL+i/(points.length-1)*iW);
   const ys=v=>(padT+iH-(v/maxY)*iH);
-
-  // Y axis labels
   const yLabels=[0,Math.round(maxY/2),maxY].map(v=>`<text x="${padL-6}" y="${ys(v)+4}" text-anchor="end" font-size="9" fill="var(--t3)">${v}</text>`).join('');
-
-  // X axis labels (show max 6)
   const step=Math.max(1,Math.ceil(points.length/6));
-  const xLabels=points.filter((_,i)=>i%step===0||i===points.length-1).map((p,_,arr)=>{
+  const xLabels=points.filter((_,i)=>i%step===0||i===points.length-1).map(p=>{
     const i=points.indexOf(p);
     return`<text x="${xs(i)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--t3)">${fmtDateShort(p.x)}</text>`;
   }).join('');
-
   const linePts=points.map((p,i)=>`${xs(i)},${ys(p.y)}`).join(' ');
   const areaPts=`${xs(0)},${ys(0)} ${linePts} ${xs(points.length-1)},${ys(0)}`;
-
   const dots=points.map((p,i)=>`<circle cx="${xs(i)}" cy="${ys(p.y)}" r="5" fill="var(--accent)" opacity="0" style="cursor:pointer" onmouseenter="showTip(event,'${p.x}: ${p.y} ventas')" onmouseleave="hideTip()"/><circle cx="${xs(i)}" cy="${ys(p.y)}" r="3" fill="var(--accent)" style="pointer-events:none"/>`).join('');
   return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
     <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
@@ -1165,10 +1184,8 @@ function svgBar(points){
 }
 
 // ── HELPERS ──
-// Órdenes que realmente generaron ingreso (excluye free, exchange, gratis, canje)
 function isPaid(o){
   if(o.status===7)return false;
-  // excluir reembolsados
   const refund=(o.refundStatus||o.refundState||o.isRefund||'').toString().toLowerCase();
   if(refund&&refund!=='0'&&refund!=='no'&&refund!=='none'&&refund!=='null')return false;
   const sname=(o.statusName||'').toLowerCase();
@@ -1177,7 +1194,6 @@ function isPaid(o){
   if(pay.includes('exchange')||pay.includes('free')||pay.includes('gratis')||pay.includes('canje'))return false;
   return Number(o.payAmt||0)>0;
 }
-// GS System guarda en hora local argentina — tomamos directo los primeros 10 chars
 function orderDate(o){return(o.createTime||'').slice(0,10);}
 function orderMonth(o){return(o.createTime||'').slice(0,7);}
 function fmt(n){return Number(n).toLocaleString('es-AR',{maximumFractionDigits:0});}
@@ -1189,5 +1205,6 @@ function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function showTip(e,text){const t=document.getElementById('chart-tooltip');t.textContent=text;t.style.display='block';t.style.left=(e.clientX+12)+'px';t.style.top=(e.clientY-28)+'px';}
 function hideTip(){document.getElementById('chart-tooltip').style.display='none';}
 </script>
+
 </body>
 </html>
