@@ -731,6 +731,27 @@ const MACHINE_PHYSICAL_PRODUCTS = {
     { label: 'Proteína Cookies',          match: n => n.includes('cookies') },
     { label: 'Electrolitos',              match: n => n.includes('electrolito') },
   ],
+  'Pacheco sportclub': [
+    { label: 'Proteína Vainilla',              match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('creatina') },
+    { label: 'Proteína Cookies',               match: n => n.includes('cookies')&&!n.includes('creatina') },
+    { label: 'Proteína + Creatina Vainilla',   match: n => (n.includes('vainilla')||n.includes('vanilla'))&&n.includes('creatina') },
+    { label: 'Proteína + Creatina Cookies',    match: n => n.includes('cookies')&&n.includes('creatina') },
+    { label: 'Colágeno + Proteína Choco',      match: n => (n.includes('colag')||n.includes('collagen'))&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Electrolitos',                   match: n => n.includes('electrolito')||n.includes('blue razz')||n.includes('razz') },
+    { label: 'Creatina',                       match: n => n.includes('creatina')&&!n.includes('vainilla')&&!n.includes('vanilla')&&!n.includes('cookies') },
+    { label: 'Proteína 3 en 1 Vainilla',       match: n => (n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde'))&&(n.includes('vainilla')||n.includes('vanilla')) },
+  ],
+  'Euskal sportclub': [
+    { label: 'Proteína Vainilla',              match: n => (n.includes('vainilla')||n.includes('vanilla'))&&!n.includes('colag')&&!n.includes('creatina') },
+    { label: 'Proteína Cookies',               match: n => n.includes('cookies')&&!n.includes('creatina') },
+    { label: 'Proteína + Creatina Vainilla',   match: n => (n.includes('vainilla')||n.includes('vanilla'))&&n.includes('creatina') },
+    { label: 'Proteína + Creatina Cookies',    match: n => n.includes('cookies')&&n.includes('creatina') },
+    { label: 'Colágeno + Proteína Choco',      match: n => (n.includes('colag')||n.includes('collagen'))&&(n.includes('choco')||n.includes('chocolate')) },
+    { label: 'Colágeno Frutos Rojos',          match: n => n.includes('frutos')||((n.includes('colag')||n.includes('collagen'))&&n.includes('rojo')) },
+    { label: 'Electrolitos',                   match: n => n.includes('electrolito')||n.includes('blue razz')||n.includes('razz') },
+    { label: 'Creatina',                       match: n => n.includes('creatina')&&!n.includes('vainilla')&&!n.includes('vanilla')&&!n.includes('cookies') },
+    { label: 'Proteína 3 en 1 Vainilla',       match: n => (n.includes('3 en 1')||n.includes('1 en 3')||n.includes('te verde'))&&(n.includes('vainilla')||n.includes('vanilla')) },
+  ],
 };
 
 function renderStock() {
